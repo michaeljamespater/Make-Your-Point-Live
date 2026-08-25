@@ -1,3 +1,4 @@
+// firebase-secret-loader-v3-2026-08-25
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
@@ -62,19 +63,47 @@ async function connectDb() {
         if (fs.existsSync(secretsDir)) {
           const files = fs.readdirSync(secretsDir);
           console.log("  Secret files present:", files.join(", ") || "(none)");
-          for (const f of files) {
+          const ordered = [
+            ...files.filter(f => f.includes("firebase") || f.includes("adminsdk")),
+            ...files.filter(f => !f.startsWith(".."))
+          ];
+          for (const f of ordered) {
+            if (f.startsWith("..")) continue;
             const full = path.join(secretsDir, f);
-            const content = fs.readFileSync(full, "utf8");
-            if (content.includes("service_account") || content.includes("private_key")) {
-              sa = content;
-              console.log("  Loaded Firebase key from secret file:", full);
-              break;
+            try {
+              const content = fs.readFileSync(full, "utf8").trim();
+              console.log("  Checking secret file:", f, "length:", content.length);
+              if (content.includes("private_key") || content.includes("service_account")) {
+                sa = content;
+                console.log("  Loaded Firebase key from secret file:", full);
+                break;
+              }
+            } catch (readErr) {
+              console.log("  Could not read", f, String(readErr));
             }
           }
         }
       } catch (e) {
-        console.log("  Could not list /etc/secrets");
+        console.log("  Could not list /etc/secrets", String(e));
       }
+    }
+  }
+  if (!sa) {
+    try {
+      const rootFiles = fs.readdirSync(projectRoot);
+      console.log("  Project root files:", rootFiles.filter(f => !f.startsWith(".") && f !== "node_modules" && f !== "dist").join(", "));
+      for (const f of rootFiles) {
+        if (f === "NEW_SECRET" || f === "firebase.json" || f.endsWith(".json")) {
+          const content = fs.readFileSync(path.join(projectRoot, f), "utf8");
+          if (content.includes("private_key") || content.includes("service_account")) {
+            sa = content;
+            console.log("  Loaded Firebase key from root file:", f);
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      console.log("  Could not scan project root");
     }
   }
   if (!sa) {
