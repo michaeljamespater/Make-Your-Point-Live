@@ -32,7 +32,26 @@ let firestore: any = null;
 let useFirebase = false;
 
 async function connectDb() {
-  const sa = process.env.FIREBASE_SERVICE_ACCOUNT;
+  const fs = await import("fs");
+  let sa = process.env.FIREBASE_SERVICE_ACCOUNT || "";
+  const filePath =
+    process.env.FIREBASE_SERVICE_ACCOUNT_FILE ||
+    "/etc/secrets/FIREBASE_SERVICE_ACCOUNT" ||
+    "/etc/secrets/firebase.json";
+  if (!sa) {
+    for (const p of [
+      process.env.FIREBASE_SERVICE_ACCOUNT_FILE,
+      "/etc/secrets/FIREBASE_SERVICE_ACCOUNT",
+      "/etc/secrets/firebase.json",
+      "/etc/secrets/serviceAccount.json"
+    ]) {
+      if (p && fs.existsSync(p)) {
+        sa = fs.readFileSync(p, "utf8");
+        console.log("  Loaded Firebase key from file:", p);
+        break;
+      }
+    }
+  }
   if (!sa) {
     console.log("  No FIREBASE_SERVICE_ACCOUNT — memory only (data lost on restart)");
     return;
