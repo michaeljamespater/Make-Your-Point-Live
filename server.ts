@@ -2,18 +2,18 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import { MongoClient, Db } from "mongodb";
 
 dotenv.config();
 
-// Use process.cwd() so this works in both local and Render production builds
 const projectRoot = process.cwd();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === "production";
+const MONGODB_URI = process.env.MONGODB_URI || "";
 
 app.use(express.json({ limit: "50mb" }));
 
-// In-memory store for demo
 let points: any[] = [];
 let replies: Record<string, any[]> = {};
 let sponsorships: Record<string, any[]> = {};
@@ -29,6 +29,64 @@ let manifesto = {
 };
 let discoveryStats: Record<string, number> = {};
 let paypalConfig = { paypalEmail: "", paypalMeLink: "" };
+
+let db: Db | null = null;
+let mongoClient: MongoClient | null = null;
+
+async function connectDb() {
+  if (!MONGODB_URI) {
+    console.log("  No MONGODB_URI — using memory only (data lost on restart)");
+    return;
+  }
+  try {
+    mongoClient = new MongoClient(MONGODB_URI);
+    await mongoClient.connect();
+    db = mongoClient.db("makeyourpoint");
+    console.log("  MongoDB connected — points will persist");
+    await loadAll();
+  } catch (err) {
+    console.error("  MongoDB connect failed, using memory only:", err);
+    db = null;
+  }
+}
+
+async function loadAll() {
+  if (!db) return;
+  const col = db.collection("store");
+  const doc = await col.findOne({ _id: "main" as any });
+  if (doc) {
+    points = doc.points || [];
+    replies = doc.replies || {};
+    sponsorships = doc.sponsorships || {};
+    manifesto = doc.manifesto || manifesto;
+    discoveryStats = doc.discoveryStats || {};
+    paypalConfig = doc.paypalConfig || paypalConfig;
+    console.log(`  Loaded ${points.length} points from database`);
+  }
+}
+
+async function saveAll() {
+  if (!db) return;
+  try {
+    await db.collection("store").updateOne(
+      { _id: "main" as any },
+      {
+        $set: {
+          points,
+          replies,
+          sponsorships,
+          manifesto,
+          discoveryStats,
+          paypalConfig,
+          updatedAt: new Date().toISOString()
+        }
+      },
+      { upsert: true }
+    );
+  } catch (err) {
+    console.error("  Save failed:", err);
+  }
+}
 
 // --- API ROUTES ---
 app.get("/api/points", (req, res) => {
@@ -49,7 +107,7 @@ app.get("/api/points", (req, res) => {
   res.json(result);
 });
 
-app.post("/api/points", (req, res) => {
+app.post("/api/points", async (req, res) => {
   const body = req.body;
   if (!body.content?.trim()) return res.status(400).json({ error: "Content required" });
   const point = {
@@ -72,17 +130,19 @@ app.post("/api/points", (req, res) => {
     createdAt: new Date().toISOString()
   };
   points.unshift(point);
+  await saveAll();
   res.json(point);
 });
 
-app.put("/api/points/:id", (req, res) => {
+app.put("/api/points/:id", async (req, res) => {
   const idx = points.findIndex(p => p.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: "Not found" });
   points[idx] = { ...points[idx], ...req.body };
+  await saveAll();
   res.json(points[idx]);
 });
 
-app.delete("/api/points/:id", (req, res) => {
+app.delete("/api/points/:id", async (req, res) => {
   const pt = points.find(p => p.id === req.params.id);
   if (!pt) return res.status(404).json({ error: "Not found" });
 
@@ -99,14 +159,16 @@ app.delete("/api/points/:id", (req, res) => {
   points = points.filter(p => p.id !== req.params.id);
   delete replies[req.params.id];
   delete sponsorships[req.params.id];
+  await saveAll();
   res.json({ ok: true });
 });
 
-app.post("/api/points/:id/react", (req, res) => {
+app.post("/api/points/:id/react", async (req, res) => {
   const pt = points.find(p => p.id === req.params.id);
   if (!pt) return res.status(404).json({ error: "Not found" });
   const type = req.body.reactionType;
   if (pt.reactions[type] !== undefined) pt.reactions[type]++;
+  await saveAll();
   res.json(pt.reactions);
 });
 
@@ -114,7 +176,7 @@ app.get("/api/points/:id/replies", (req, res) => {
   res.json(replies[req.params.id] || []);
 });
 
-app.post("/api/points/:id/replies", (req, res) => {
+app.post("/api/points/:id/replies", async (req, res) => {
   const reply = {
     id: `r-${Date.now()}`,
     pointId: req.params.id,
@@ -126,10 +188,11 @@ app.post("/api/points/:id/replies", (req, res) => {
   replies[req.params.id].push(reply);
   const pt = points.find(p => p.id === req.params.id);
   if (pt) pt.repliesCount = (pt.repliesCount || 0) + 1;
+  await saveAll();
   res.json(reply);
 });
 
-app.post("/api/points/:id/sponsor", (req, res) => {
+app.post("/api/points/:id/sponsor", async (req, res) => {
   const pt = points.find(p => p.id === req.params.id);
   if (!pt) return res.status(404).json({ error: "Not found" });
   const amount = Number(req.body.amount) || 0;
@@ -152,6 +215,7 @@ app.post("/api/points/:id/sponsor", (req, res) => {
   pt.sponsorshipsTotal = (pt.sponsorshipsTotal || 0) + amount;
   pt.sponsorshipsCount = (pt.sponsorshipsCount || 0) + 1;
 
+  await saveAll();
   res.json({
     ok: true,
     total: pt.sponsorshipsTotal,
@@ -175,15 +239,7 @@ app.get("/api/categories", (req, res) => {
     if (!map[p.category].subcategories[sub]) map[p.category].subcategories[sub] = { name: sub, count: 0, repliesCount: 0 };
     map[p.category].subcategories[sub].count++;
   });
-  const categories = Object.values(map).map((c: any) => ({
-    ...c,
-    subcategories: Object.values(c.subcategories)
-  }));
-  const audienceCounts: Record<string, number> = {};
-  points.forEach(p => {
-    audienceCounts[p.targetAudience] = (audienceCounts[p.targetAudience] || 0) + 1;
-  });
-  res.json({ categories, audienceCounts });
+  res.json(Object.values(map));
 });
 
 app.get("/api/stats", (req, res) => {
@@ -194,37 +250,29 @@ app.get("/api/stats", (req, res) => {
 });
 
 app.get("/api/manifesto", (req, res) => res.json(manifesto));
-app.put("/api/manifesto", (req, res) => {
+app.put("/api/manifesto", async (req, res) => {
   manifesto = { ...manifesto, ...req.body };
+  await saveAll();
   res.json(manifesto);
 });
 app.post("/api/manifesto/ai-rewrite", (req, res) => {
-  res.json({ ...req.body.currentData, explanation: "AI rewrite simulated." });
+  res.json(manifesto);
 });
 
 app.get("/api/discovery/stats", (req, res) => res.json(discoveryStats));
-app.post("/api/discovery/vote", (req, res) => {
-  const s = req.body.source;
-  discoveryStats[s] = (discoveryStats[s] || 0) + 1;
-  res.json({ ok: true });
+app.post("/api/discovery/vote", async (req, res) => {
+  const key = req.body?.option || "default";
+  discoveryStats[key] = (discoveryStats[key] || 0) + 1;
+  await saveAll();
+  res.json(discoveryStats);
 });
 
 app.post("/api/check-reality", (req, res) => {
-  res.json({
-    status: "independent",
-    rating: 82,
-    title: "Independent Mind Confirmed",
-    message: "Appears grounded in personal perspective.",
-    challenge: "Ready to publish."
-  });
+  res.json({ ok: true, note: "Reality check placeholder" });
 });
 
 app.post("/api/spellcheck", (req, res) => {
-  res.json({
-    polishedTitle: req.body.title,
-    polishedContent: req.body.content,
-    corrections: []
-  });
+  res.json({ corrected: req.body?.text || "", suggestions: [] });
 });
 
 app.post("/api/upload", (req, res) => {
@@ -247,29 +295,30 @@ app.get("/api/monetization/status", (req, res) => {
 });
 
 app.get("/api/config/paypal", (req, res) => res.json(paypalConfig));
-app.post("/api/config/paypal", (req, res) => {
+app.post("/api/config/paypal", async (req, res) => {
   paypalConfig = { ...paypalConfig, ...req.body };
+  await saveAll();
   res.json(paypalConfig);
 });
 
-app.post("/api/seed-all", (req, res) => {
+app.post("/api/seed-all", async (req, res) => {
   points = [];
   replies = {};
   sponsorships = {};
+  await saveAll();
   res.json({ ok: true });
 });
 
-// --- FRONTEND ---
 async function start() {
+  await connectDb();
+
   if (!isProd) {
-    // Development: Vite middleware
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa"
     });
     app.use(vite.middlewares);
   } else {
-    // Production: static files
     app.use(express.static(path.join(projectRoot, "dist")));
     app.get("*", (req, res) => {
       res.sendFile(path.join(projectRoot, "dist", "index.html"));
@@ -280,7 +329,7 @@ async function start() {
     console.log(`\n  Make Your Point is running!`);
     console.log(`  PC:    http://localhost:${PORT}`);
     console.log(`  Phone: http://YOUR-PC-IP:${PORT}`);
-    console.log(`  (Find YOUR-PC-IP with: ipconfig → IPv4 Address)\n`);
+    console.log(`  DB:    ${db ? "MongoDB (persistent)" : "memory only"}\n`);
   });
 }
 
