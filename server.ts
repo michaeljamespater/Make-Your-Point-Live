@@ -2,7 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { MongoClient, Db } from "mongodb";
 
 dotenv.config();
 
@@ -10,7 +9,6 @@ const projectRoot = process.cwd();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === "production";
-const MONGODB_URI = process.env.MONGODB_URI || "";
 
 app.use(express.json({ limit: "50mb" }));
 
@@ -30,65 +28,66 @@ let manifesto = {
 let discoveryStats: Record<string, number> = {};
 let paypalConfig = { paypalEmail: "", paypalMeLink: "" };
 
-let db: Db | null = null;
-let mongoClient: MongoClient | null = null;
+let firestore: any = null;
+let useFirebase = false;
 
 async function connectDb() {
-  if (!MONGODB_URI) {
-    console.log("  No MONGODB_URI — using memory only (data lost on restart)");
+  const sa = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (!sa) {
+    console.log("  No FIREBASE_SERVICE_ACCOUNT — memory only (data lost on restart)");
     return;
   }
   try {
-    mongoClient = new MongoClient(MONGODB_URI);
-    await mongoClient.connect();
-    db = mongoClient.db("makeyourpoint");
-    console.log("  MongoDB connected — points will persist");
+    const admin = await import("firebase-admin");
+    const cred = JSON.parse(sa);
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(cred)
+      });
+    }
+    firestore = admin.firestore();
+    useFirebase = true;
+    console.log("  Firebase connected — points will persist");
     await loadAll();
   } catch (err) {
-    console.error("  MongoDB connect failed, using memory only:", err);
-    db = null;
+    console.error("  Firebase connect failed, using memory only:", err);
+    firestore = null;
+    useFirebase = false;
   }
 }
 
 async function loadAll() {
-  if (!db) return;
-  const col = db.collection("store");
-  const doc = await col.findOne({ _id: "main" as any });
-  if (doc) {
+  if (!firestore) return;
+  const snap = await firestore.collection("store").doc("main").get();
+  if (snap.exists) {
+    const doc = snap.data() || {};
     points = doc.points || [];
     replies = doc.replies || {};
     sponsorships = doc.sponsorships || {};
     manifesto = doc.manifesto || manifesto;
     discoveryStats = doc.discoveryStats || {};
     paypalConfig = doc.paypalConfig || paypalConfig;
-    console.log(`  Loaded ${points.length} points from database`);
+    console.log(`  Loaded ${points.length} points from Firebase`);
   }
 }
 
 async function saveAll() {
-  if (!db) return;
+  if (!firestore) return;
   try {
-    await db.collection("store").updateOne(
-      { _id: "main" as any },
-      {
-        $set: {
-          points,
-          replies,
-          sponsorships,
-          manifesto,
-          discoveryStats,
-          paypalConfig,
-          updatedAt: new Date().toISOString()
-        }
-      },
-      { upsert: true }
-    );
+    await firestore.collection("store").doc("main").set({
+      points,
+      replies,
+      sponsorships,
+      manifesto,
+      discoveryStats,
+      paypalConfig,
+      updatedAt: new Date().toISOString()
+    });
   } catch (err) {
-    console.error("  Save failed:", err);
+    console.error("  Firebase save failed:", err);
   }
 }
 
-// --- API ROUTES ---
 app.get("/api/points", (req, res) => {
   let result = [...points];
   const { category, subcategory, audience, search } = req.query;
@@ -145,17 +144,14 @@ app.put("/api/points/:id", async (req, res) => {
 app.delete("/api/points/:id", async (req, res) => {
   const pt = points.find(p => p.id === req.params.id);
   if (!pt) return res.status(404).json({ error: "Not found" });
-
   const { authorMoniker, isEditorMode } = req.body || {};
   const isOwner = isEditorMode === true;
   const isAuthor =
     authorMoniker &&
     (pt.authorMoniker || "").trim().toLowerCase() === String(authorMoniker).trim().toLowerCase();
-
   if (!isOwner && !isAuthor) {
     return res.status(403).json({ error: "You can only delete your own points" });
   }
-
   points = points.filter(p => p.id !== req.params.id);
   delete replies[req.params.id];
   delete sponsorships[req.params.id];
@@ -197,7 +193,6 @@ app.post("/api/points/:id/sponsor", async (req, res) => {
   if (!pt) return res.status(404).json({ error: "Not found" });
   const amount = Number(req.body.amount) || 0;
   if (amount <= 0) return res.status(400).json({ error: "Invalid amount" });
-
   const entry = {
     id: `spon-${Date.now()}`,
     pointId: req.params.id,
@@ -208,20 +203,12 @@ app.post("/api/points/:id/sponsor", async (req, res) => {
     mode: req.body.mode || "sandbox",
     createdAt: new Date().toISOString()
   };
-
   if (!sponsorships[req.params.id]) sponsorships[req.params.id] = [];
   sponsorships[req.params.id].unshift(entry);
-
   pt.sponsorshipsTotal = (pt.sponsorshipsTotal || 0) + amount;
   pt.sponsorshipsCount = (pt.sponsorshipsCount || 0) + 1;
-
   await saveAll();
-  res.json({
-    ok: true,
-    total: pt.sponsorshipsTotal,
-    count: pt.sponsorshipsCount,
-    sponsorship: entry
-  });
+  res.json({ ok: true, total: pt.sponsorshipsTotal, count: pt.sponsorshipsCount, sponsorship: entry });
 });
 
 app.get("/api/points/:id/sponsorships", (req, res) => {
@@ -245,7 +232,8 @@ app.get("/api/categories", (req, res) => {
 app.get("/api/stats", (req, res) => {
   res.json({
     totalPoints: points.length,
-    totalConnections: points.filter(p => p.linkedFromPointId).length
+    totalConnections: points.filter(p => p.linkedFromPointId).length,
+    persistence: useFirebase ? "firebase" : "memory"
   });
 });
 
@@ -255,9 +243,7 @@ app.put("/api/manifesto", async (req, res) => {
   await saveAll();
   res.json(manifesto);
 });
-app.post("/api/manifesto/ai-rewrite", (req, res) => {
-  res.json(manifesto);
-});
+app.post("/api/manifesto/ai-rewrite", (req, res) => res.json(manifesto));
 
 app.get("/api/discovery/stats", (req, res) => res.json(discoveryStats));
 app.post("/api/discovery/vote", async (req, res) => {
@@ -267,14 +253,8 @@ app.post("/api/discovery/vote", async (req, res) => {
   res.json(discoveryStats);
 });
 
-app.post("/api/check-reality", (req, res) => {
-  res.json({ ok: true, note: "Reality check placeholder" });
-});
-
-app.post("/api/spellcheck", (req, res) => {
-  res.json({ corrected: req.body?.text || "", suggestions: [] });
-});
-
+app.post("/api/check-reality", (req, res) => res.json({ ok: true }));
+app.post("/api/spellcheck", (req, res) => res.json({ corrected: req.body?.text || "", suggestions: [] }));
 app.post("/api/upload", (req, res) => {
   const { base64Data, fileType, filename } = req.body;
   const type = fileType?.startsWith("video/") ? "video" : fileType?.startsWith("audio/") ? "audio" : "photo";
@@ -311,7 +291,6 @@ app.post("/api/seed-all", async (req, res) => {
 
 async function start() {
   await connectDb();
-
   if (!isProd) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -324,12 +303,9 @@ async function start() {
       res.sendFile(path.join(projectRoot, "dist", "index.html"));
     });
   }
-
   app.listen(Number(PORT), "0.0.0.0", () => {
     console.log(`\n  Make Your Point is running!`);
-    console.log(`  PC:    http://localhost:${PORT}`);
-    console.log(`  Phone: http://YOUR-PC-IP:${PORT}`);
-    console.log(`  DB:    ${db ? "MongoDB (persistent)" : "memory only"}\n`);
+    console.log(`  DB:    ${useFirebase ? "Firebase (persistent)" : "memory only"}\n`);
   });
 }
 
