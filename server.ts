@@ -39,17 +39,41 @@ async function connectDb() {
     "/etc/secrets/FIREBASE_SERVICE_ACCOUNT" ||
     "/etc/secrets/firebase.json";
   if (!sa) {
-    for (const p of [
+    const candidates = [
       process.env.FIREBASE_SERVICE_ACCOUNT_FILE,
       "/etc/secrets/FIREBASE_SERVICE_ACCOUNT",
       "/etc/secrets/firebase.json",
       "/etc/secrets/serviceAccount.json",
-      "/etc/secrets/NEW_SECRET"
-    ]) {
+      "/etc/secrets/NEW_SECRET",
+      path.join(projectRoot, "NEW_SECRET"),
+      path.join(projectRoot, "firebase.json"),
+      path.join(projectRoot, "serviceAccount.json")
+    ];
+    for (const p of candidates) {
       if (p && fs.existsSync(p)) {
         sa = fs.readFileSync(p, "utf8");
         console.log("  Loaded Firebase key from file:", p);
         break;
+      }
+    }
+    if (!sa) {
+      try {
+        const secretsDir = "/etc/secrets";
+        if (fs.existsSync(secretsDir)) {
+          const files = fs.readdirSync(secretsDir);
+          console.log("  Secret files present:", files.join(", ") || "(none)");
+          for (const f of files) {
+            const full = path.join(secretsDir, f);
+            const content = fs.readFileSync(full, "utf8");
+            if (content.includes("service_account") || content.includes("private_key")) {
+              sa = content;
+              console.log("  Loaded Firebase key from secret file:", full);
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.log("  Could not list /etc/secrets");
       }
     }
   }
