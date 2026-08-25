@@ -1,4 +1,4 @@
-// firebase-secret-loader-v3-2026-08-25
+// firebase-secret-loader-v4-2026-08-25
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
@@ -111,9 +111,11 @@ async function connectDb() {
     return;
   }
   try {
-    const admin = await import("firebase-admin");
+    const adminMod = await import("firebase-admin");
+    const admin = adminMod.default || adminMod;
     const cred = JSON.parse(sa);
-    if (!admin.apps.length) {
+    const apps = admin.apps || [];
+    if (!apps.length) {
       admin.initializeApp({
         credential: admin.credential.cert(cred)
       });
