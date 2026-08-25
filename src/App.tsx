@@ -580,6 +580,31 @@ export default function App() {
         >
           Admin
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (isEditorMode) {
+              setIsEditorMode(false);
+              return;
+            }
+            let pin = "1234";
+            try { pin = localStorage.getItem("owner_access_pin") || "1234"; } catch {}
+            const entered = window.prompt("Enter Owner PIN to enable Editor");
+            if (entered !== null && entered.trim() === pin) {
+              setIsEditorMode(true);
+            } else if (entered !== null) {
+              window.alert("Invalid PIN");
+            }
+          }}
+          className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wide border cursor-pointer ${
+            isEditorMode
+              ? "bg-amber-500 text-slate-950 border-amber-400"
+              : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+          }`}
+          title="Editor mode — delete or edit any point"
+        >
+          {isEditorMode ? "Editor ON" : "Editor"}
+        </button>
       </div>
 
       {/* Main Content Arena */}
@@ -1231,6 +1256,8 @@ export default function App() {
         {isMonetizeOpen && (
           <MonetizationDashboard
             onClose={() => setIsMonetizeOpen(false)}
+            isEditorMode={isEditorMode}
+            onToggleEditorMode={() => setIsEditorMode(prev => !prev)}
             onSelectPoint={(ptId) => {
               const pt = points.find(p => p.id === ptId);
               if (pt) {

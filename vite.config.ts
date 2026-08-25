@@ -17,5 +17,8 @@ export default defineConfig({
     alias: {
       "@": "/src"
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 2000
   }
 });

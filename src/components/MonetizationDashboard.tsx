@@ -21,6 +21,8 @@ import { motion } from "motion/react";
 interface MonetizationDashboardProps {
   onClose: () => void;
   onSelectPoint?: (pointId: string) => void;
+  isEditorMode?: boolean;
+  onToggleEditorMode?: () => void;
 }
 
 interface MonetizationStats {
@@ -40,7 +42,9 @@ interface MonetizationStats {
 
 export default function MonetizationDashboard({
   onClose,
-  onSelectPoint
+  onSelectPoint,
+  isEditorMode = false,
+  onToggleEditorMode
 }: MonetizationDashboardProps) {
   const [stats, setStats] = useState<MonetizationStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -274,6 +278,27 @@ export default function MonetizationDashboard({
             <>
               {activeTab === "metrics" ? (
                 <div className="space-y-6">
+                  {/* Editor mode — delete/edit any point */}
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                      <h4 className="text-xs font-bold text-amber-400 uppercase font-mono">Editor Mode</h4>
+                      <p className="text-xs text-gray-300 mt-1">
+                        When on, you can delete or edit any point on the site. Turn off when finished.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onToggleEditorMode && onToggleEditorMode()}
+                      className={`px-4 py-2 text-xs font-black uppercase tracking-wide border cursor-pointer shrink-0 ${
+                        isEditorMode
+                          ? "bg-amber-500 text-slate-950 border-amber-400"
+                          : "bg-slate-900 text-slate-200 border-slate-600"
+                      }`}
+                    >
+                      {isEditorMode ? "Editor ON" : "Editor OFF"}
+                    </button>
+                  </div>
+
                   {/* Highlight KPI Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-4 bg-brand-bg/50 border border-brand-border/30 rounded-2xl space-y-1">
