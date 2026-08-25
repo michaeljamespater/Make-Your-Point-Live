@@ -43,7 +43,8 @@ async function connectDb() {
       process.env.FIREBASE_SERVICE_ACCOUNT_FILE,
       "/etc/secrets/FIREBASE_SERVICE_ACCOUNT",
       "/etc/secrets/firebase.json",
-      "/etc/secrets/serviceAccount.json"
+      "/etc/secrets/serviceAccount.json",
+      "/etc/secrets/NEW_SECRET"
     ]) {
       if (p && fs.existsSync(p)) {
         sa = fs.readFileSync(p, "utf8");
