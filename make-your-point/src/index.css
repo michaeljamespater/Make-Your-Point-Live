@@ -1,0 +1,311 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Space Grotesk", sans-serif;
+  
+  --color-brand-bg: #f8fafc;
+  --color-brand-card: #ffffff;
+  --color-brand-border: #e2e8f0;
+  --color-brand-accent: #ea580c; /* Rich orange accent */
+  --color-brand-accent-glow: #f97316;
+}
+
+/* Custom global styles */
+body {
+  background-color: var(--color-brand-bg);
+  color: #0f172a;
+  font-family: var(--font-sans);
+  overflow-y: scroll;
+}
+
+/* Force square corners on all buttons and banners */
+button,
+[role="button"],
+.btn,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+a[role="button"],
+.banner,
+[class*="banner"],
+[id*="banner"],
+[class*="rounded-"][class*="btn"],
+button[class*="rounded"],
+[role="button"][class*="rounded"] {
+  border-radius: 0 !important;
+}
+
+/* Square off common banner / header / pill panels */
+.rounded-2xl.bg-gradient-to-r,
+.rounded-xl.bg-gradient-to-r,
+.rounded-2xl.bg-orange-600,
+.rounded-xl.bg-orange-600,
+.rounded-2xl.bg-amber-500,
+.rounded-xl.bg-amber-500,
+[class*="signature"][class*="header"],
+[id*="header-panel"],
+[id*="banner"] {
+  border-radius: 0 !important;
+}
+
+html.dark,
+.dark {
+  color-scheme: dark;
+  --color-brand-bg: #090d16;
+  --color-brand-card: #131b2e;
+  --color-brand-border: #1e293b;
+}
+
+html.dark,
+html.dark body,
+body.dark {
+  background-color: #090d16 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Global dark overrides for cards, sidebars, panels and backgrounds */
+.dark .bg-white,
+.dark .bg-slate-50,
+.dark .bg-slate-50\/80,
+.dark .bg-slate-50\/90,
+.dark .bg-slate-50\/95,
+.dark .bg-slate-100,
+.dark .bg-slate-100\/80,
+.dark .bg-brand-card {
+  background-color: #131b2e !important;
+  color: #f1f5f9;
+}
+
+.dark .bg-slate-200,
+.dark .bg-slate-200\/80,
+.dark .bg-slate-300 {
+  background-color: #1e293b !important;
+  color: #f1f5f9;
+}
+
+.dark .bg-brand-bg,
+.dark .bg-brand-bg\/40 {
+  background-color: #0d1322 !important;
+}
+
+/* Borders in Dark Mode */
+.dark .border-slate-200,
+.dark .border-slate-200\/80,
+.dark .border-slate-300,
+.dark .border-slate-400\/60,
+.dark .border-brand-border,
+.dark .border-brand-border\/20 {
+  border-color: #233044 !important;
+}
+
+/* Text Colors in Dark Mode - Default for structural text */
+.dark body,
+.dark p,
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+.dark label,
+.dark li,
+.dark span.text-slate-900,
+.dark span.text-slate-800,
+.dark div.text-slate-900,
+.dark div.text-slate-800 {
+  color: #f8fafc;
+}
+
+.dark .text-slate-700,
+.dark .text-slate-600 {
+  color: #cbd5e1;
+}
+
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: #94a3b8;
+}
+
+/* HIGH CONTRAST BUTTON & BADGE TEXT OVERRIDES IN DARK MODE */
+/* Solid bright buttons, badges, pills, & tags MUST retain dark, crisp text in dark mode */
+.dark button.bg-amber-500,
+.dark button.bg-amber-400,
+.dark button.bg-amber-300,
+.dark button.bg-yellow-400,
+.dark button.bg-yellow-300,
+.dark button.bg-orange-400,
+.dark button.bg-orange-500,
+.dark .badge-bright,
+.dark .pill-bright,
+.dark .text-slate-950,
+.dark .text-amber-950,
+.dark .text-orange-950 {
+  color: #020617 !important;
+}
+
+/* Ensure inner icons and text in bright buttons are dark and sharp */
+.dark button.bg-amber-500 *,
+.dark button.bg-amber-400 *,
+.dark button.bg-amber-300 *,
+.dark button.bg-yellow-400 *,
+.dark button.bg-yellow-300 *,
+.dark button.bg-orange-400 *,
+.dark button.bg-orange-500 * {
+  color: #020617 !important;
+  fill: currentColor;
+}
+
+/* Solid Dark & Saturated Buttons - Crisp White Text */
+.dark .bg-orange-600,
+.dark .bg-orange-700,
+.dark .bg-indigo-600,
+.dark .bg-fuchsia-600,
+.dark .bg-violet-600,
+.dark .bg-rose-600,
+.dark .bg-sky-600,
+.dark .bg-teal-600,
+.dark .bg-emerald-600,
+.dark .bg-slate-800,
+.dark .bg-slate-700,
+.dark .bg-slate-900,
+.dark button.bg-orange-600 {
+  color: #ffffff !important;
+}
+
+.dark .bg-orange-600 *,
+.dark .bg-orange-700 *,
+.dark .bg-indigo-600 *,
+.dark .bg-slate-800 *,
+.dark .bg-slate-700 * {
+  color: #ffffff !important;
+}
+
+/* Interactive elements & hover states in dark mode */
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover {
+  background-color: #1a243a !important;
+}
+
+.dark .hover\:bg-slate-200:hover {
+  background-color: #26354f !important;
+}
+
+/* Input, Textarea, Select elements in Dark Mode */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  background-color: #0b101d !important;
+  color: #f8fafc !important;
+  border-color: #26354f !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Headers, Footers, Navigation Bars in Dark Mode */
+.dark #main-header,
+.dark #mobile-tabs-bar {
+  background-color: rgba(13, 19, 34, 0.95) !important;
+  border-color: #1e293b !important;
+}
+
+.dark #mobile-tabs-bar {
+  background-color: #131b2e !important;
+}
+
+/* Popups, Modals & Dropdowns */
+.dark .bg-white\/95,
+.dark .bg-white\/90,
+.dark .bg-white\/80 {
+  background-color: rgba(19, 27, 46, 0.96) !important;
+}
+
+/* Chat & Special Panels */
+.dark .bg-amber-50,
+.dark .bg-amber-100\/80 {
+  background-color: #1c1917 !important;
+  border-color: #44403c !important;
+  color: #fef3c7 !important;
+}
+
+.dark .bg-orange-50 {
+  background-color: #1c120c !important;
+  color: #ffedd5 !important;
+}
+
+/* Custom scrollbar to match sleek light theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-brand-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-accent);
+}
+
+/* Accent glow animation with shadowed highlight */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    box-shadow: 0 8px 24px rgba(234, 88, 12, 0.25), 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.accent-glow-pulse {
+  animation: pulseGlow 3s infinite;
+}
+
+.shadow-card-highlight {
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+}
+
+.shadow-card-elevated {
+  box-shadow: 0 4px 14px 0 rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.04);
+}
+
+/* Dark mode: ensure root and cards stay dark on mobile + desktop */
+html.dark #root,
+html.dark #app-root-container {
+  background-color: #090d16 !important;
+  color: #f1f5f9 !important;
+  min-height: 100%;
+}
+
+html.dark .shadow-card-highlight,
+html.dark .shadow-card-elevated {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #0b101d;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-accent);
+}
+
+/* Global: square every button and banner-like control */
+button,
+[role="button"],
+.btn,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.banner {
+  border-radius: 0 !important;
+}
