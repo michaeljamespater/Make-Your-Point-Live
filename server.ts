@@ -1,4 +1,4 @@
-// firebase-secret-loader-v4-2026-08-25
+// firebase-secret-loader-v5-2026-08-25
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
@@ -131,6 +131,19 @@ async function connectDb() {
   }
 }
 
+
+function stripUndefined(value: any): any {
+  if (Array.isArray(value)) return value.map(stripUndefined);
+  if (value && typeof value === "object") {
+    const out: any = {};
+    for (const [k, v] of Object.entries(value)) {
+      if (v !== undefined) out[k] = stripUndefined(v);
+    }
+    return out;
+  }
+  return value;
+}
+
 async function loadAll() {
   if (!firestore) return;
   const snap = await firestore.collection("store").doc("main").get();
@@ -149,7 +162,7 @@ async function loadAll() {
 async function saveAll() {
   if (!firestore) return;
   try {
-    await firestore.collection("store").doc("main").set({
+    const payload = stripUndefined({
       points,
       replies,
       sponsorships,
@@ -158,6 +171,8 @@ async function saveAll() {
       paypalConfig,
       updatedAt: new Date().toISOString()
     });
+    await firestore.collection("store").doc("main").set(payload);
+    console.log("  Firebase saved", points.length, "points");
   } catch (err) {
     console.error("  Firebase save failed:", err);
   }
