@@ -1,4 +1,4 @@
-// firebase-secret-loader-v5-2026-08-25
+// firebase-secret-loader-v6-2026-08-25
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
@@ -116,8 +116,10 @@ async function connectDb() {
     const cred = JSON.parse(sa);
     const apps = admin.apps || [];
     if (!apps.length) {
+      const bucketName = process.env.FIREBASE_STORAGE_BUCKET || `${cred.project_id}.appspot.com`;
       admin.initializeApp({
-        credential: admin.credential.cert(cred)
+        credential: admin.credential.cert(cred),
+        storageBucket: bucketName
       });
     }
     firestore = admin.firestore();
@@ -345,9 +347,37 @@ app.post("/api/discovery/vote", async (req, res) => {
 
 app.post("/api/check-reality", (req, res) => res.json({ ok: true }));
 app.post("/api/spellcheck", (req, res) => res.json({ corrected: req.body?.text || "", suggestions: [] }));
-app.post("/api/upload", (req, res) => {
+app.post("/api/upload", async (req, res) => {
   const { base64Data, fileType, filename } = req.body;
   const type = fileType?.startsWith("video/") ? "video" : fileType?.startsWith("audio/") ? "audio" : "photo";
+  if (!base64Data) return res.status(400).json({ error: "No file data" });
+
+  if (useFirebase) {
+    try {
+      const adminMod = await import("firebase-admin");
+      const admin = adminMod.default || adminMod;
+      const raw = String(base64Data).includes(",") ? String(base64Data).split(",")[1] : String(base64Data);
+      const buffer = Buffer.from(raw, "base64");
+      const safeName = String(filename || `file-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
+      const objectPath = `uploads/${Date.now()}-${safeName}`;
+      const bucket = admin.storage().bucket();
+      const file = bucket.file(objectPath);
+      await file.save(buffer, {
+        metadata: { contentType: fileType || "application/octet-stream" },
+        resumable: false
+      });
+      const [url] = await file.getSignedUrl({
+        action: "read",
+        expires: "2099-12-31"
+      });
+      console.log("  Stored media in Firebase Storage:", objectPath);
+      return res.json({ url, type, name: filename || safeName });
+    } catch (err) {
+      console.error("  Firebase Storage upload failed:", err);
+      return res.status(500).json({ error: "Video/file storage failed. Check Firebase Storage is enabled." });
+    }
+  }
+
   res.json({ url: base64Data, type, name: filename });
 });
 

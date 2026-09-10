@@ -619,6 +619,16 @@ export default function App() {
               onPointToPoint={() => navigateToPage("Point To Point", { showFirst: false, isChat: true, isPrivate: false, mobileTabTarget: 'browse' })}
               onPrivateChats={() => navigateToPage("Private Chats", { showFirst: false, isChat: false, isPrivate: true, mobileTabTarget: 'browse' })}
               onBrowsePoints={() => navigateToPage("All Points", { showFirst: false, isChat: false, isPrivate: false, resetPoint: true, resetFilters: true, mobileTabTarget: 'browse' })}
+              onSelectForum={(audienceId) => {
+                setActiveFilters({ category: null, subcategory: null, audience: audienceId, search: "" });
+                setSelectedPoint(null);
+                setEditingPoint(null);
+                setShowFirstPage(false);
+                setIsChatSectionOpen(false);
+                setIsPrivateChatsOpen(false);
+                setMobileTab("browse");
+                setActivePageName(`Voice Forum: ${audienceId}`);
+              }}
               isDarkMode={isDarkMode}
               onToggleTheme={() => setIsDarkMode(prev => !prev)}
             />

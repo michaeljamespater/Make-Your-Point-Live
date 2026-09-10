@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Point, ReactionType } from "../types";
+import { Point, ReactionType, audienceLabel } from "../types";
 import {
   Volume2,
   Award,
@@ -127,7 +127,7 @@ export default function PointCard({
 ${divider}
 📍 CATEGORY: ${point.category.toUpperCase()}
 👤 AUTHOR: ${point.authorMoniker}
-🎯 VOICING FOR: ${point.targetAudience}
+🎯 VOICING FOR: ${audienceLabel(point.targetAudience)}
 ${webAddressLine}${divider}
 ⚡ TITLE: "${point.title}"
 
@@ -233,7 +233,7 @@ ${divider}
   
   <!-- Demographic Target -->
   <rect x="210" y="100" width="120" height="26" rx="6" fill="#f9731610" stroke="#f9731630" stroke-width="1" />
-  <text x="270" y="117" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#f97316" text-anchor="middle">${point.targetAudience.toUpperCase()}</text>
+  <text x="270" y="117" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#f97316" text-anchor="middle">${audienceLabel(point.targetAudience).toUpperCase()}</text>
   
   <!-- Title -->
   <text x="40" y="152" font-family="'Space Grotesk', system-ui, sans-serif" font-size="16" font-weight="700" fill="#ffffff">${escapeXml(point.title.length > 55 ? point.title.substring(0, 52) + "..." : point.title)}</text>
@@ -419,7 +419,7 @@ ${divider}
         <div className="flex items-center gap-1.5 ml-auto">
           {/* Dynamic Demographic Voicing badge */}
           <span className="text-[10px] uppercase tracking-wider text-orange-900 bg-orange-100 border border-orange-300 px-2 py-0.5 rounded font-mono font-bold">
-            {point.targetAudience}
+            {audienceLabel(point.targetAudience)}
           </span>
           {onDelete && !isEditorMode && (
             <button

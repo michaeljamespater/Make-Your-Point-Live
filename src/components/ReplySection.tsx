@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Point, Reply } from "../types";
+import { Point, Reply, audienceLabel } from "../types";
 import {
   X,
   MessageSquare,
@@ -225,7 +225,7 @@ export default function ReplySection({
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 shrink-0 overflow-y-auto max-h-[300px]">
         <div className="flex items-center gap-2 mb-1.5">
           <span className="text-[10px] uppercase font-mono font-semibold text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200">
-            {point.targetAudience}
+            {audienceLabel(point.targetAudience)}
           </span>
           <span className="text-xs text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
             {point.category} • {point.subcategory}

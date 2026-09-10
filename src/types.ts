@@ -71,11 +71,11 @@ export interface AudienceVoice {
 const DEFAULT_VOICES: AudienceVoice[] = [
   { id: "all", label: "All Forums", desc: "Every voice across the platform" },
   { id: "SilentMajority", label: "Silent Majority", desc: "Everyday people rarely heard" },
-  { id: "Makers", label: "Makers", desc: "Builders, crafters, hands-on creators" },
-  { id: "Creators", label: "Creators", desc: "Artists, writers, innovators of culture" },
-  { id: "Innovators", label: "Innovators", desc: "New ideas and breakthroughs" },
-  { id: "Traders", label: "Traders", desc: "Commerce, markets, exchange" },
-  { id: "Preservers", label: "Preservers", desc: "Heritage, tradition, continuity" },
+  { id: "Makers", label: "Makers (Builders and Crafters)", desc: "Builders and Crafters" },
+  { id: "Creators", label: "Creators (Architects and Artists)", desc: "Architects and Artists" },
+  { id: "Innovators", label: "Innovators (Inventors and Trail Blazers)", desc: "Inventors and Trail Blazers" },
+  { id: "Traders", label: "Traders (Buyers and Suppliers)", desc: "Buyers and Suppliers" },
+  { id: "Preservers", label: "Preservers (Without a Past, there is no Future)", desc: "Without a Past, there is no Future" },
   { id: "ForgottenMinority", label: "Forgotten Minority", desc: "Overlooked communities" },
   { id: "AbandonedAlone", label: "Abandoned Alone", desc: "Those left behind" },
   { id: "CancelledNoHope", label: "Cancelled / No Hope", desc: "De-platformed voices" },
@@ -86,9 +86,15 @@ const DEFAULT_VOICES: AudienceVoice[] = [
   { id: "PeopleOfTomorrow", label: "People of Tomorrow", desc: "Future-focused voices" }
 ];
 
+export function audienceLabel(id?: string): string {
+  if (!id) return "";
+  const found = DEFAULT_VOICES.find(v => v.id === id);
+  return found?.label || id;
+}
+
 export function getAudienceVoices(): AudienceVoice[] {
   try {
-    const stored = localStorage.getItem("make_your_point_audience_voices");
+    const stored = localStorage.getItem("make_your_point_audience_voices_v3");
     if (stored) return JSON.parse(stored);
   } catch {}
   return DEFAULT_VOICES;
@@ -96,6 +102,6 @@ export function getAudienceVoices(): AudienceVoice[] {
 
 export function saveAudienceVoices(voices: AudienceVoice[]) {
   try {
-    localStorage.setItem("make_your_point_audience_voices", JSON.stringify(voices));
+    localStorage.setItem("make_your_point_audience_voices_v3", JSON.stringify(voices));
   } catch {}
 }

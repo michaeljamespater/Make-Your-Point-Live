@@ -7,6 +7,7 @@ interface FirstPageLandingProps {
   onPointToPoint: () => void;
   onPrivateChats: () => void;
   onBrowsePoints: () => void;
+  onSelectForum?: (audienceId: string) => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
 }
@@ -16,9 +17,17 @@ export default function FirstPageLanding({
   onPointToPoint,
   onPrivateChats,
   onBrowsePoints,
+  onSelectForum,
   isDarkMode,
   onToggleTheme
 }: FirstPageLandingProps) {
+  const forums = [
+    { id: "Makers", title: "Makers", sub: "Builders and Crafters" },
+    { id: "Creators", title: "Creators", sub: "Architects and Artists" },
+    { id: "Innovators", title: "Innovators", sub: "Inventors and Trail Blazers" },
+    { id: "Traders", title: "Traders", sub: "Buyers and Suppliers" },
+    { id: "Preservers", title: "Preservers", sub: "Without a Past, there is no Future" }
+  ];
   return (
     <div className="min-h-[85vh] flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-6 max-w-6xl mx-auto w-full text-slate-900 dark:text-slate-100" id="first-page-container">
 
@@ -172,6 +181,23 @@ export default function FirstPageLanding({
           </div>
         </motion.button>
 
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full max-w-6xl mx-auto mt-8" id="first-page-forum-buttons">
+        {forums.map((forum) => (
+          <motion.button
+            key={forum.id}
+            type="button"
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onSelectForum && onSelectForum(forum.id)}
+            className="bg-white dark:bg-slate-900 border-2 border-orange-500/70 hover:border-orange-500 text-slate-900 dark:text-white p-5 min-h-[160px] flex flex-col justify-center items-center text-center shadow-lg cursor-pointer"
+            id={`btn-forum-${forum.id}`}
+          >
+            <h2 className="text-base sm:text-lg font-black uppercase tracking-tight mb-2">{forum.title}</h2>
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-snug">({forum.sub})</p>
+          </motion.button>
+        ))}
       </div>
     </div>
   );
