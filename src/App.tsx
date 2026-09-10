@@ -1090,8 +1090,8 @@ export default function App() {
                 </div>
               )}
 
-                {/* 5. Voice Forums & Directory Index */}
-                <aside
+                {/* 5. Voice Forums & Directory Index — Make Your Point only */}
+                {isFullAppPage && <aside>
                   className={`w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm ${
                     mobileTab === 'browse' ? 'block' : 'hidden md:block'
                   }`}
@@ -1133,10 +1133,10 @@ export default function App() {
                       scrollToTop();
                     }}
                   />
-                </aside>
+                </aside>}
 
-                {/* 6. Platform Bylaws & Preambles - VERY BOTTOM OF PAGE */}
-                <div className="space-y-6 pt-4 border-t border-slate-200 shrink-0">
+                {/* 6. Platform Bylaws & Preambles — Make Your Point only */}
+                {isFullAppPage && <div className="space-y-6 pt-4 border-t border-slate-200 shrink-0">
                   <PlatformManifesto 
                     stats={stats} 
                     isEditorMode={false} 
@@ -1148,7 +1148,7 @@ export default function App() {
                   />
                   <OurWayOfLife />
                   <DiscoverySurvey />
-                </div>
+                </div>}
               </>
             )}
           </div>
