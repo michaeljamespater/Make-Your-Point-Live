@@ -421,18 +421,31 @@ ${divider}
           <span className="text-[10px] uppercase tracking-wider text-orange-900 bg-orange-100 border border-orange-300 px-2 py-0.5 rounded font-mono font-bold">
             {audienceLabel(point.targetAudience)}
           </span>
-          {onDelete && !isEditorMode && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="p-1 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 hover:text-red-700 transition-colors cursor-pointer"
-              title="Delete (Remove) Point"
-              id={`btn-delete-card-${point.id}`}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
+          {!isEditorMode && (onEdit || onDelete) && (
+            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              {onEdit && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                  className="px-2 py-1 border border-slate-400 text-[10px] font-bold uppercase cursor-pointer"
+                  title="Amend this point"
+                >
+                  Amend
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  className="p-1 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 cursor-pointer"
+                  title="Delete this point"
+                  id={`btn-delete-card-${point.id}`}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

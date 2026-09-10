@@ -31,6 +31,8 @@ let paypalConfig = { paypalEmail: "", paypalMeLink: "" };
 
 let firestore: any = null;
 let useFirebase = false;
+let storeLoaded = false;
+let lastSavedPointCount = 0;
 
 async function connectDb() {
   const fs = await import("fs");
@@ -161,16 +163,30 @@ async function loadAll() {
     discoveryStats = doc.discoveryStats || {};
     paypalConfig = doc.paypalConfig || paypalConfig;
     console.log(`  Loaded ${points.length} points from Firebase`);
+    lastSavedPointCount = points.length;
+  } else {
+    console.log("  Firebase store/main is empty — not overwriting until data exists");
   }
+  storeLoaded = true;
 }
 
 async function saveAll() {
   if (!firestore) return;
+  if (!storeLoaded) {
+    console.log("  Skip save — store not loaded yet");
+    return;
+  }
+  if ((points || []).length === 0 && lastSavedPointCount > 0) {
+    console.log("  Skip save — refused to wipe", lastSavedPointCount, "existing points");
+    await loadAll();
+    return;
+  }
   try {
-    const cleanPoints = (points || []).map((pt: any) => ({
-      ...pt,
-      media: (pt.media || []).filter((m: any) => m && typeof m.url === "string" && m.url.startsWith("http"))
-    }));
+    const cleanPoints = (points || []).map((pt: any) => {
+      const oldMedia = Array.isArray(pt.media) ? pt.media : [];
+      const kept = oldMedia.filter((m: any) => m && typeof m.url === "string" && (m.url.startsWith("http") || m.url.startsWith("data:")));
+      return { ...pt, media: kept.filter((m: any) => m.url.startsWith("http") || m.url.startsWith("https")) };
+    });
     const payload = stripUndefined({
       points: cleanPoints,
       replies,
@@ -181,7 +197,8 @@ async function saveAll() {
       updatedAt: new Date().toISOString()
     });
     await firestore.collection("store").doc("main").set(payload);
-    console.log("  Firebase saved", points.length, "points");
+    lastSavedPointCount = cleanPoints.length;
+    console.log("  Firebase saved", cleanPoints.length, "points");
   } catch (err) {
     console.error("  Firebase save failed:", err);
   }
@@ -235,7 +252,16 @@ app.post("/api/points", async (req, res) => {
 app.put("/api/points/:id", async (req, res) => {
   const idx = points.findIndex(p => p.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: "Not found" });
-  points[idx] = { ...points[idx], ...req.body };
+  const incoming = { ...req.body };
+  const existing = points[idx];
+  if (!Object.prototype.hasOwnProperty.call(incoming, "media") || incoming.media == null) {
+    incoming.media = existing.media || [];
+  }
+  if (Array.isArray(incoming.media) && incoming.media.length === 0 && (existing.media || []).length > 0 && incoming._clearMedia !== true) {
+    incoming.media = existing.media;
+  }
+  delete incoming._clearMedia;
+  points[idx] = { ...existing, ...incoming, id: existing.id };
   await saveAll();
   res.json(points[idx]);
 });

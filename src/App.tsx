@@ -811,7 +811,7 @@ export default function App() {
                             onSelectPoint={setSelectedPoint}
                             onStartLinking={handleStartLinking}
                             isEditorMode={isEditorMode}
-                            onEdit={() => setEditingPoint(selectedPoint)}
+                            onEdit={canDeletePoint(selectedPoint) ? () => setEditingPoint(selectedPoint) : undefined}
                             onDelete={canDeletePoint(selectedPoint) ? () => handleDeletePoint(selectedPoint) : undefined}
                             onOpenSponsor={() => {
                               setSponsorPoint(selectedPoint);
@@ -1086,11 +1086,11 @@ export default function App() {
                                       onMoveUp={() => handleMoveUp(idx)}
                                       onMoveDown={() => handleMoveDown(idx)}
                                       onDelete={canDeletePoint(pt) ? () => handleDeletePoint(pt) : undefined}
-                                      onEdit={() => {
+                                      onEdit={canDeletePoint(pt) ? () => {
                                         setEditingPoint(pt);
                                         setSelectedPoint(null);
                                         setMobileTab('post');
-                                      }}
+                                      } : undefined}
                                       onStartLinking={handleStartLinking}
                                       onSparkConnection={handleStartLinking}
                                       onOpenDirectChat={handleOpenDirectChat}
@@ -1117,11 +1117,11 @@ export default function App() {
                             onMoveUp={() => handleMoveUp(idx)}
                             onMoveDown={() => handleMoveDown(idx)}
                             onDelete={canDeletePoint(pt) ? () => handleDeletePoint(pt) : undefined}
-                            onEdit={() => {
+                            onEdit={canDeletePoint(pt) ? () => {
                               setEditingPoint(pt);
                               setSelectedPoint(null);
                               setMobileTab('post');
-                            }}
+                            } : undefined}
                             onStartLinking={handleStartLinking}
                             onSparkConnection={handleStartLinking}
                             onOpenDirectChat={handleOpenDirectChat}

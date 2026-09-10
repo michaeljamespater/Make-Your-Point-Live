@@ -11,7 +11,8 @@ import {
   Eye,
   Settings,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -26,6 +27,7 @@ interface PointEditorPanelProps {
     targetAudience: string;
     tags?: string[];
     webAddress?: string;
+    media?: Point["media"];
   }) => void;
 }
 
@@ -48,6 +50,7 @@ export default function PointEditorPanel({ point, onCancel, onSaved }: PointEdit
   const [targetAudience, setTargetAudience] = useState(point.targetAudience);
   const [tags, setTags] = useState(point.tags?.join(", ") || "");
   const [webAddress, setWebAddress] = useState(point.webAddress || "");
+  const [media, setMedia] = useState(point.media || []);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +84,7 @@ export default function PointEditorPanel({ point, onCancel, onSaved }: PointEdit
     setTargetAudience(point.targetAudience);
     setTags(point.tags?.join(", ") || "");
     setWebAddress(point.webAddress || "");
+    setMedia(point.media || []);
     setPolishResult(null);
     setError(null);
     setSuccess(false);
@@ -143,7 +147,8 @@ export default function PointEditorPanel({ point, onCancel, onSaved }: PointEdit
           subcategory: subcategory.trim(),
           targetAudience,
           tags: parsedTags,
-          webAddress: webAddress.trim()
+          webAddress: webAddress.trim(),
+          media
         })
       });
 
@@ -157,7 +162,8 @@ export default function PointEditorPanel({ point, onCancel, onSaved }: PointEdit
             subcategory: subcategory.trim(),
             targetAudience,
             tags: parsedTags,
-            webAddress: webAddress.trim()
+            webAddress: webAddress.trim(),
+            media
           });
         }, 1200);
       } else {
@@ -241,6 +247,32 @@ export default function PointEditorPanel({ point, onCancel, onSaved }: PointEdit
             placeholder="Flesh out your point..."
             required
           />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase">Photos, videos and files</label>
+          {(media || []).length === 0 ? (
+            <p className="text-xs text-slate-600">No files on this point.</p>
+          ) : (
+            <ul className="space-y-2">
+              {media.map((m, idx) => (
+                <li key={idx} className="flex items-center justify-between border border-slate-300 p-2 text-xs">
+                  <span className="font-bold uppercase">{m.type}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("Remove this file from the point?")) {
+                        setMedia(prev => prev.filter((_, i) => i !== idx));
+                      }
+                    }}
+                    className="flex items-center gap-1 text-red-700 font-bold cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Delete file
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* AI POLISH REPORT OVERLAY */}
