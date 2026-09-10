@@ -742,7 +742,7 @@ export default function App() {
                 {/* 3. Interactive Form / Discussion Thread / Point Sandbox Editor - AT TOP */}
                 {(isFullAppPage ? (editingPoint || selectedPoint || mobileTab === 'post' || linkingFromPoint) : true) && (
                   <div className="w-full space-y-4 pb-4 border-b border-slate-200 dark:border-slate-800" id="right-interactive-column">
-                    <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
+                    <div className={`flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs ${isFullAppPage ? "" : "hidden"}`}>
                       <button
                         onClick={() => {
                           setSelectedPoint(null);
@@ -824,19 +824,20 @@ export default function App() {
                           className="block"
                         >
                           <PointForm
+                            simpleForm={!isFullAppPage}
                             onPointCreated={(newPoint) => {
                               handlePointCreated(newPoint);
                               setLinkingFromPoint(null);
-                              setMobileTab('browse');
+                              if (isFullAppPage) setMobileTab('browse');
                             }}
                             onSelectCreatedPoint={(newPoint) => {
                               setSelectedPoint(newPoint);
-                              setMobileTab('browse');
+                              if (isFullAppPage) setMobileTab('browse');
                             }}
                             linkingFromPoint={linkingFromPoint}
                             onCancelLink={() => setLinkingFromPoint(null)}
                             onBrowseAllPoints={() => {
-                              setMobileTab('browse');
+                              if (isFullAppPage) setMobileTab('browse');
                             }}
                           />
                         </motion.div>

@@ -43,6 +43,7 @@ interface PointFormProps {
   linkingFromPoint?: Point | null;
   onCancelLink?: () => void;
   onBrowseAllPoints?: () => void;
+  simpleForm?: boolean;
 }
 
 const CATEGORIES = [
@@ -171,7 +172,7 @@ function compressImage(file: File, maxWidth = 900, maxHeight = 900, quality = 0.
   });
 }
 
-export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkingFromPoint, onCancelLink, onBrowseAllPoints }: PointFormProps) {
+export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkingFromPoint, onCancelLink, onBrowseAllPoints, simpleForm = false }: PointFormProps) {
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [subcategory, setSubcategory] = useState("");
@@ -613,6 +614,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
             </div>
           </div>
 
+          {!simpleForm && <>
           {/* Title / Headline (Optional) */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1.5">
@@ -784,11 +786,12 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
               )}
             </button>
           </div>
+          </>}
         </form>
       </div>
 
       {/* Side-by-side Panels BELOW: Point Category & Your Voice Forums */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {!simpleForm && <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* PANEL 1: Point Category Panel */}
         <div
           className="bg-white border border-slate-200/80 p-5 shadow-card-highlight flex flex-col justify-between"
@@ -935,7 +938,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
             </div>
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
