@@ -1091,7 +1091,8 @@ export default function App() {
               )}
 
                 {/* 5. Voice Forums & Directory Index — Make Your Point only */}
-                {isFullAppPage && <aside>
+                {isFullAppPage && (
+                <aside
                   className={`w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm ${
                     mobileTab === 'browse' ? 'block' : 'hidden md:block'
                   }`}
@@ -1133,7 +1134,8 @@ export default function App() {
                       scrollToTop();
                     }}
                   />
-                </aside>}
+                </aside>
+                )}
 
                 {/* 6. Platform Bylaws & Preambles — Make Your Point only */}
                 {isFullAppPage && <div className="space-y-6 pt-4 border-t border-slate-200 shrink-0">
