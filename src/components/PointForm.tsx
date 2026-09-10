@@ -255,13 +255,24 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
             }),
           });
 
-          if (response.ok) {
-            const data = await response.json();
-            finalUrl = data.url;
-            finalType = data.type;
+          if (!response.ok) {
+            const errBody = await response.json().catch(() => ({}));
+            throw new Error(errBody.error || "Upload failed");
           }
-        } catch (fetchErr) {
+          const data = await response.json();
+          finalUrl = data.url;
+          finalType = data.type;
+        } catch (fetchErr: any) {
+          if (isVideo) {
+            setUploadError(fetchErr.message || "Video upload failed. Deploy latest code and enable Firebase Storage.");
+            continue;
+          }
           console.warn("Upload API endpoint fallback to inlined Data URL:", fetchErr);
+        }
+
+        if (isVideo && !String(finalUrl).startsWith("http")) {
+          setUploadError("Video was not stored. Try again after deploy.");
+          continue;
         }
 
         setUploadedMedia(prev => [...prev, {

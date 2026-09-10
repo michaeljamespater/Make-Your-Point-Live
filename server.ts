@@ -1,4 +1,4 @@
-// firebase-secret-loader-v6-2026-08-25
+// firebase-secret-loader-v7-2026-09-10
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
@@ -116,11 +116,14 @@ async function connectDb() {
     const cred = JSON.parse(sa);
     const apps = admin.apps || [];
     if (!apps.length) {
-      const bucketName = process.env.FIREBASE_STORAGE_BUCKET || `${cred.project_id}.appspot.com`;
+      const bucketName =
+        process.env.FIREBASE_STORAGE_BUCKET ||
+        `${cred.project_id}.firebasestorage.app`;
       admin.initializeApp({
         credential: admin.credential.cert(cred),
         storageBucket: bucketName
       });
+      console.log("  Storage bucket:", bucketName);
     }
     firestore = admin.firestore();
     useFirebase = true;
@@ -164,8 +167,12 @@ async function loadAll() {
 async function saveAll() {
   if (!firestore) return;
   try {
+    const cleanPoints = (points || []).map((pt: any) => ({
+      ...pt,
+      media: (pt.media || []).filter((m: any) => m && typeof m.url === "string" && m.url.startsWith("http"))
+    }));
     const payload = stripUndefined({
-      points,
+      points: cleanPoints,
       replies,
       sponsorships,
       manifesto,
@@ -374,7 +381,24 @@ app.post("/api/upload", async (req, res) => {
       return res.json({ url, type, name: filename || safeName });
     } catch (err) {
       console.error("  Firebase Storage upload failed:", err);
-      return res.status(500).json({ error: "Video/file storage failed. Check Firebase Storage is enabled." });
+      try {
+        const adminMod2 = await import("firebase-admin");
+        const admin2 = adminMod2.default || adminMod2;
+        const cred = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || "{}");
+        const alt = admin2.storage().bucket(`${(cred.project_id || "make-your-point-11539")}.appspot.com`);
+        const raw2 = String(base64Data).includes(",") ? String(base64Data).split(",")[1] : String(base64Data);
+        const buffer2 = Buffer.from(raw2, "base64");
+        const safeName2 = String(filename || `file-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
+        const objectPath2 = `uploads/${Date.now()}-${safeName2}`;
+        const file2 = alt.file(objectPath2);
+        await file2.save(buffer2, { metadata: { contentType: fileType || "application/octet-stream" }, resumable: false });
+        const [url2] = await file2.getSignedUrl({ action: "read", expires: "2099-12-31" });
+        console.log("  Stored media in fallback bucket:", objectPath2);
+        return res.json({ url: url2, type, name: filename || safeName2 });
+      } catch (err2) {
+        console.error("  Fallback storage failed:", err2);
+        return res.status(500).json({ error: "Video/file storage failed. Check Firebase Storage is enabled." });
+      }
     }
   }
 
