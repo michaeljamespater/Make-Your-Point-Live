@@ -429,6 +429,23 @@ export default function PrivateChatsPage({
             </p>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={() => {
+            let link = "";
+            try { link = localStorage.getItem("paypal_me_link") || ""; } catch {}
+            if (link) {
+              const url = link.startsWith("http") ? link : `https://paypal.me/${link.replace(/^@/, "")}`;
+              window.open(url, "_blank");
+            } else {
+              window.alert("Set your PayPal link in Admin first.");
+            }
+          }}
+          className="px-4 py-2 text-xs font-black uppercase tracking-wide bg-amber-500 text-slate-950 border border-amber-400 cursor-pointer"
+          id="btn-private-fuel"
+        >
+          Fuel
+        </button>
       </div>
 
       {/* Standalone Main Private Chat Container */}
@@ -707,12 +724,12 @@ export default function PrivateChatsPage({
                     <Paperclip className="w-4 h-4" />
                   </button>
 
-                  <input
-                    type="text"
+                  <textarea
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder={`Private message to ${getRecipientMoniker(activeChat)}...`}
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    rows={3}
+                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-y"
                   />
 
                   <button

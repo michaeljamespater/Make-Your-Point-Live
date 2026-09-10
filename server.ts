@@ -356,7 +356,13 @@ app.post("/api/check-reality", (req, res) => res.json({ ok: true }));
 app.post("/api/spellcheck", (req, res) => res.json({ corrected: req.body?.text || "", suggestions: [] }));
 app.post("/api/upload", async (req, res) => {
   const { base64Data, fileType, filename } = req.body;
-  const type = fileType?.startsWith("video/") ? "video" : fileType?.startsWith("audio/") ? "audio" : "photo";
+  const type = fileType?.startsWith("video/")
+    ? "video"
+    : fileType?.startsWith("audio/")
+      ? "audio"
+      : fileType?.startsWith("image/")
+        ? "photo"
+        : "file";
   if (!base64Data) return res.status(400).json({ error: "No file data" });
 
   if (useFirebase) {

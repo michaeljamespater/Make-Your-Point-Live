@@ -908,12 +908,12 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
                 </button>
 
                 {/* Text Field */}
-                <input
-                  type="text"
+                <textarea
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   placeholder={`Message ${activeChat.name} as ${userMoniker}...`}
-                  className="flex-1 bg-slate-900 border border-slate-800 focus:border-amber-500/50 focus:outline-none rounded-xl px-3.5 py-2 text-xs md:text-sm text-slate-100 placeholder-slate-500 font-sans"
+                  rows={3}
+                  className="flex-1 bg-slate-900 border border-slate-800 focus:border-amber-500/50 focus:outline-none rounded-xl px-3.5 py-2 text-xs md:text-sm text-slate-100 placeholder-slate-500 font-sans resize-y"
                 />
 
                 {/* Send Button */}

@@ -37,10 +37,10 @@ export default function FirstPageLanding({
           MAKE YOUR POINT
         </h1>
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-          Your voice matters. Speak freely, be heard, and know you are not alone.
+          Trade here in the open. Show the work. Ask for what you need. Make the deal.
         </p>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-lg mx-auto">
-          No forms to pass. No gatekeepers. Just your truth, shared with respect.
+          Descriptions, requests, photos, videos, and deal-making. No gatekeepers.
         </p>
       </div>
 
@@ -78,18 +78,19 @@ export default function FirstPageLanding({
         </button>
       </div>
 
+      <div className="w-full max-w-6xl mx-auto" id="first-page-button-stack">
       {/* 4 Large Simple Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full max-w-6xl mx-auto" id="first-page-buttons-grid">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full" id="first-page-buttons-grid">
         
         {/* BUTTON 1: Make Your Point */}
         <motion.button
           whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
           onClick={onMakeYourPoint}
-          className="group relative bg-gradient-to-br from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white p-7 rounded-3xl shadow-xl shadow-orange-600/20 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-orange-400/30 min-h-[230px]"
+          className="group relative bg-gradient-to-br from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white p-7 shadow-xl shadow-orange-600/20 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-orange-400/30 min-h-[230px]"
           id="btn-firstpage-make-your-point"
         >
-          <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center mb-5 text-white group-hover:scale-110 transition-transform">
+          <div className="w-14 h-14 bg-white/15 backdrop-blur-md flex items-center justify-center mb-5 text-white group-hover:scale-110 transition-transform">
             <Megaphone className="w-7 h-7 stroke-[2.2]" />
           </div>
           <div>
@@ -111,10 +112,10 @@ export default function FirstPageLanding({
           whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
           onClick={onPointToPoint}
-          className="group relative bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-750 text-slate-100 p-7 rounded-3xl shadow-xl shadow-slate-950/20 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-amber-500/30 min-h-[230px]"
+          className="group relative bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-750 text-slate-100 p-7 shadow-xl shadow-slate-950/20 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-amber-500/30 min-h-[230px]"
           id="btn-firstpage-point-to-point"
         >
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-5 text-amber-400 group-hover:scale-110 transition-transform">
+          <div className="w-14 h-14 bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-5 text-amber-400 group-hover:scale-110 transition-transform">
             <MessageSquare className="w-7 h-7 stroke-[2.2]" />
           </div>
           <div>
@@ -136,10 +137,10 @@ export default function FirstPageLanding({
           whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
           onClick={onPrivateChats}
-          className="group relative bg-gradient-to-br from-indigo-900 to-slate-900 dark:from-indigo-950 dark:to-slate-900 hover:from-indigo-850 hover:to-slate-850 text-slate-100 p-7 rounded-3xl shadow-xl shadow-indigo-950/20 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-indigo-500/40 min-h-[230px]"
+          className="group relative bg-gradient-to-br from-indigo-900 to-slate-900 dark:from-indigo-950 dark:to-slate-900 hover:from-indigo-850 hover:to-slate-850 text-slate-100 p-7 shadow-xl shadow-indigo-950/20 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-indigo-500/40 min-h-[230px]"
           id="btn-firstpage-private-chats"
         >
-          <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center mb-5 text-indigo-300 group-hover:scale-110 transition-transform">
+          <div className="w-14 h-14 bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center mb-5 text-indigo-300 group-hover:scale-110 transition-transform">
             <Lock className="w-7 h-7 stroke-[2.2]" />
           </div>
           <div>
@@ -161,10 +162,10 @@ export default function FirstPageLanding({
           whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
           onClick={onBrowsePoints}
-          className="group relative bg-gradient-to-br from-teal-900 via-teal-950 to-slate-950 dark:from-teal-900 dark:via-teal-950 dark:to-slate-950 hover:from-teal-800 hover:via-teal-900 hover:to-slate-900 text-white p-7 rounded-3xl shadow-xl shadow-teal-950/40 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-teal-400/50 min-h-[230px]"
+          className="group relative bg-gradient-to-br from-teal-900 via-teal-950 to-slate-950 dark:from-teal-900 dark:via-teal-950 dark:to-slate-950 hover:from-teal-800 hover:via-teal-900 hover:to-slate-900 text-white p-7 shadow-xl shadow-teal-950/40 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-teal-400/50 min-h-[230px]"
           id="btn-firstpage-points"
         >
-          <div className="w-14 h-14 rounded-2xl bg-teal-400/25 border border-teal-300/40 flex items-center justify-center mb-5 text-teal-200 group-hover:scale-110 transition-transform shadow-inner">
+          <div className="w-14 h-14 bg-teal-400/25 border border-teal-300/40 flex items-center justify-center mb-5 text-teal-200 group-hover:scale-110 transition-transform shadow-inner">
             <Layers className="w-7 h-7 stroke-[2.2]" />
           </div>
           <div>
@@ -183,7 +184,7 @@ export default function FirstPageLanding({
 
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full max-w-6xl mx-auto mt-8" id="first-page-forum-buttons">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 w-full mt-5" id="first-page-forum-buttons">
         {forums.map((forum) => (
           <motion.button
             key={forum.id}
@@ -191,13 +192,14 @@ export default function FirstPageLanding({
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelectForum && onSelectForum(forum.id)}
-            className="bg-white dark:bg-slate-900 border-2 border-orange-500/70 hover:border-orange-500 text-slate-900 dark:text-white p-5 min-h-[160px] flex flex-col justify-center items-center text-center shadow-lg cursor-pointer"
+            className="bg-white dark:bg-slate-900 border-2 border-orange-500/70 hover:border-orange-500 text-slate-900 dark:text-white px-2 py-4 min-h-[110px] flex flex-col justify-center items-center text-center shadow-lg cursor-pointer"
             id={`btn-forum-${forum.id}`}
           >
-            <h2 className="text-base sm:text-lg font-black uppercase tracking-tight mb-2">{forum.title}</h2>
-            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-snug">({forum.sub})</p>
+            <h2 className="text-sm font-black uppercase tracking-tight mb-1 leading-tight">{forum.title}</h2>
+            <p className="text-[11px] font-semibold text-orange-700 dark:text-orange-400 leading-tight">({forum.sub})</p>
           </motion.button>
         ))}
+      </div>
       </div>
     </div>
   );

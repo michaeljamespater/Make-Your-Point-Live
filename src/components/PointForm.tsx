@@ -189,7 +189,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
   const [success, setSuccess] = useState(false);
   const [lastCreatedPoint, setLastCreatedPoint] = useState<Point | null>(null);
 
-  const [uploadedMedia, setUploadedMedia] = useState<{ url: string; type: "photo" | "video" | "audio"; name: string }[]>([]);
+  const [uploadedMedia, setUploadedMedia] = useState<{ url: string; type: "photo" | "video" | "audio" | "file"; name: string }[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -223,13 +223,10 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
         const file = files[i];
         
         // Accept image, video, and audio types
-        if (!file.type.startsWith("image/") && !file.type.startsWith("video/") && !file.type.startsWith("audio/")) {
-          setUploadError("Only image, video, and audio files are supported.");
-          continue;
-        }
-
-        // File size check: 150MB for video, 25MB for images & audio
         const isVideo = file.type.startsWith("video/");
+        const isAudio = file.type.startsWith("audio/");
+        const isImage = file.type.startsWith("image/");
+        const isFile = !isVideo && !isAudio && !isImage;
         const maxSizeBytes = isVideo ? 150 * 1024 * 1024 : 25 * 1024 * 1024;
         if (file.size > maxSizeBytes) {
           setUploadError(`File size exceeds ${isVideo ? "150MB" : "25MB"} limit.`);
@@ -240,7 +237,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
         const base64Data = await compressImage(file);
 
         let finalUrl = base64Data;
-        let finalType: "photo" | "video" | "audio" = file.type.startsWith("video/") ? "video" : file.type.startsWith("audio/") ? "audio" : "photo";
+        let finalType: "photo" | "video" | "audio" | "file" = isVideo ? "video" : isAudio ? "audio" : isImage ? "photo" : "file";
 
         try {
           const response = await fetch("/api/upload", {
@@ -358,13 +355,13 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
     <div className="space-y-6">
       {/* PANEL 3: Make Your Point Main Form Card (ON TOP) */}
       <div
-        className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-card-highlight"
+        className="bg-white border border-slate-200/80 p-6 shadow-card-highlight"
         id="point-submission-form-card"
       >
         {/* Page Top Signature Header Panel: MAKE YOUR POINT (Orange & Amber Theme) */}
-        <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 border-2 border-orange-400/40 text-white rounded-2xl p-4 sm:p-5 shadow-2xl flex items-center justify-between gap-4 mb-5">
+        <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 border-2 border-orange-400/40 text-white p-4 sm:p-5 shadow-2xl flex items-center justify-between gap-4 mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shrink-0">
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shrink-0">
               <PenSquare className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
@@ -383,7 +380,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
               <button
                 type="button"
                 onClick={onCancelLink}
-                className="p-2 rounded-xl bg-slate-100 border border-slate-200 hover:text-slate-900 text-slate-600 text-xs flex items-center gap-1 cursor-pointer transition-colors"
+                className="p-2 bg-slate-100 border border-slate-200 hover:text-slate-900 text-slate-600 text-xs flex items-center gap-1 cursor-pointer transition-colors"
                 title="Cancel link and write independent point"
               >
                 <X className="w-3.5 h-3.5 text-red-500" />
@@ -393,7 +390,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
           )}
 
         {linkingFromPoint && (
-          <div className="mb-4 p-3 rounded-xl bg-orange-50 border border-orange-200 flex items-center gap-2.5 text-xs text-slate-800">
+          <div className="mb-4 p-3 bg-orange-50 border border-orange-200 flex items-center gap-2.5 text-xs text-slate-800">
             <Link2 className="w-4 h-4 text-brand-accent shrink-0 animate-pulse" />
             <div className="truncate flex-1">
               <span className="text-slate-500 block uppercase tracking-wider font-mono text-[9px] font-bold">In response to:</span>
@@ -407,7 +404,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mb-5 p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-400 text-emerald-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md"
+            className="mb-5 p-3.5 bg-emerald-50 border-2 border-emerald-400 text-emerald-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md"
             id="top-point-success-banner"
           >
             <div className="flex items-center gap-2.5">
@@ -427,7 +424,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 <button
                   type="button"
                   onClick={() => onSelectCreatedPoint(lastCreatedPoint)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer active:scale-95"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-3 transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer active:scale-95"
                   id="btn-view-published-thread"
                 >
                   <Eye className="w-3.5 h-3.5" />
@@ -437,7 +434,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
               <button
                 type="button"
                 onClick={() => setSuccess(false)}
-                className="p-1.5 text-emerald-700 hover:text-emerald-950 hover:bg-emerald-200/60 rounded-lg transition-colors cursor-pointer"
+                className="p-1.5 text-emerald-700 hover:text-emerald-950 hover:bg-emerald-200/60 transition-colors cursor-pointer"
                 title="Dismiss notification"
               >
                 <X className="w-4 h-4" />
@@ -448,7 +445,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Main Text Entry Area - FIRST AND PROMINENT */}
-          <div className="bg-white border-2 border-slate-200 rounded-2xl p-4 shadow-sm space-y-3.5">
+          <div className="bg-white border-2 border-slate-200 p-4 shadow-sm space-y-3.5">
             <label className="block text-xs font-black uppercase tracking-wider text-slate-900 flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-sm font-extrabold text-slate-900">
                 <PenSquare className="w-4 h-4 text-orange-600" /> Enter Your Point / Narrative Here *
@@ -466,7 +463,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 if (error) setError(null);
                 if (rejectionReason) setRejectionReason(null);
               }}
-              className="w-full bg-white border-2 border-slate-200 focus:border-orange-500 rounded-xl p-3.5 text-base text-slate-900 font-medium placeholder-slate-400 focus:outline-none transition-colors resize-y leading-relaxed shadow-2xs"
+              className="w-full bg-white border-2 border-slate-200 focus:border-orange-500 p-3.5 text-base text-slate-900 font-medium placeholder-slate-400 focus:outline-none transition-colors resize-y leading-relaxed shadow-2xs"
               id="point-content-textarea"
               autoFocus
             ></textarea>
@@ -493,7 +490,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
 
               {/* Drag & Drop File Upload Dropzone */}
               <div
-                className={`border-2 border-dashed rounded-xl p-3.5 text-center transition-all ${
+                className={`border-2 border-dashed p-3.5 text-center transition-all ${
                   dragOver
                     ? "border-orange-500 bg-orange-100/50"
                     : "border-slate-300 bg-white hover:border-orange-400"
@@ -514,7 +511,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 <input
                   type="file"
                   multiple
-                  accept="image/*,video/*,audio/*"
+                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip"
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) {
                       handleFileUpload(e.target.files);
@@ -537,10 +534,10 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                     </div>
                   )}
                   <div className="text-xs text-slate-900 font-medium">
-                    <span className="font-bold text-orange-700 underline">Upload media files</span> or drag & drop
+                    <span className="font-bold text-orange-700 underline">Add photo, video, PDF or file</span>
                   </div>
-                  <p className="text-[10px] text-slate-600 font-mono font-medium uppercase">
-                    Photos & Audio (Max 25MB), Videos (Max 150MB)
+                  <p className="text-[10px] text-slate-600 font-medium">
+                    Photos, videos, PDFs and other files. Say the price or the ask.
                   </p>
                 </label>
               </div>
@@ -553,12 +550,14 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
               {uploadedMedia.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
                   {uploadedMedia.map((media, idx) => (
-                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-300 aspect-video bg-slate-900 flex items-center justify-center p-2">
+                    <div key={idx} className="relative group overflow-hidden border border-slate-300 aspect-video bg-slate-900 flex items-center justify-center p-2">
                       {media.type === "video" ? (
-                        <video src={media.url} className="w-full h-full object-cover rounded" muted />
+                        <video src={media.url} className="w-full h-full object-cover " muted />
+                      ) : media.type === "file" ? (
+                        <div className="w-full text-center px-2 text-white text-xs font-bold break-all">{media.name || "File"}</div>
                       ) : media.type === "audio" ? (
                         <div className="w-full text-center px-2">
-                          <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 mx-auto mb-1 flex items-center justify-center border border-amber-500/30">
+                          <div className="w-8 h-8 bg-amber-500/20 text-amber-400 mx-auto mb-1 flex items-center justify-center border border-amber-500/30">
                             <Mic className="w-4 h-4" />
                           </div>
                           <span className="text-[10px] font-mono font-bold text-amber-300 block truncate">
@@ -566,7 +565,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                           </span>
                         </div>
                       ) : (
-                        <img src={media.url} alt={media.name} className="w-full h-full object-cover rounded" referrerPolicy="no-referrer" />
+                        <img src={media.url} alt={media.name} className="w-full h-full object-cover " referrerPolicy="no-referrer" />
                       )}
                       
                       {/* Remove button */}
@@ -575,7 +574,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                         onClick={() => {
                           setUploadedMedia(prev => prev.filter((_, i) => i !== idx));
                         }}
-                        className="absolute top-1.5 right-1.5 p-1 rounded-full bg-slate-950/80 hover:bg-red-600 text-white transition-all shadow-md cursor-pointer z-10"
+                        className="absolute top-1.5 right-1.5 p-1 bg-slate-950/80 hover:bg-red-600 text-white transition-all shadow-md cursor-pointer z-10"
                         title="Remove attachment"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -596,7 +595,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
               <button
                 type="submit"
                 disabled={isSubmitting || (!content.trim() && uploadedMedia.length === 0)}
-                className="bg-orange-600 hover:bg-orange-500 disabled:bg-slate-300 text-white font-black text-sm px-6 py-2.5 rounded-xl shadow-md shadow-orange-600/30 flex items-center gap-2 cursor-pointer transition-all disabled:cursor-not-allowed hover:scale-[1.02] active:scale-95"
+                className="bg-orange-600 hover:bg-orange-500 disabled:bg-slate-300 text-white font-black text-sm px-6 py-2.5 shadow-md shadow-orange-600/30 flex items-center gap-2 cursor-pointer transition-all disabled:cursor-not-allowed hover:scale-[1.02] active:scale-95"
                 id="quick-publish-point-btn"
               >
                 {isSubmitting ? (
@@ -624,7 +623,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
               placeholder="e.g. Why Local Repair Matters (AI generates if left blank)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
+              className="w-full bg-white border border-slate-300 px-4 py-2.5 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
               maxLength={100}
               id="point-title-input"
             />
@@ -641,7 +640,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 placeholder="e.g. SilentPerson, Maker101"
                 value={authorMoniker}
                 onChange={(e) => setAuthorMoniker(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
+                className="w-full bg-white border border-slate-300 px-3.5 py-2 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
                 maxLength={30}
                 id="author-moniker-input"
               />
@@ -656,7 +655,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 placeholder="e.g. Free Speech, DIY"
                 value={subcategory}
                 onChange={(e) => setSubcategory(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
+                className="w-full bg-white border border-slate-300 px-3.5 py-2 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
                 maxLength={30}
                 id="point-subcategory-input"
               />
@@ -671,7 +670,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 placeholder="e.g. tech, repair, offline"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
+                className="w-full bg-white border border-slate-300 px-3.5 py-2 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
                 id="point-tags-input"
               />
             </div>
@@ -685,7 +684,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 placeholder="e.g. https://my-garage.com"
                 value={webAddress}
                 onChange={(e) => setWebAddress(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
+                className="w-full bg-white border border-slate-300 px-3.5 py-2 text-sm text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors shadow-xs"
                 id="point-web-address-input"
               />
             </div>
@@ -698,7 +697,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex gap-3 text-red-200 text-sm"
+                className="bg-red-500/10 border border-red-500/30 p-4 flex gap-3 text-red-200 text-sm"
                 id="point-rejection-feedback"
               >
                 <ShieldAlert className="w-5 h-5 shrink-0 text-red-400" />
@@ -714,7 +713,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex gap-3 text-amber-200 text-sm"
+                className="bg-amber-500/10 border border-amber-500/30 p-4 flex gap-3 text-amber-200 text-sm"
                 id="point-error-feedback"
               >
                 <ShieldAlert className="w-5 h-5 shrink-0 text-amber-400" />
@@ -730,7 +729,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex gap-3 text-green-200 text-sm"
+                className="bg-green-500/10 border border-green-500/30 p-4 flex gap-3 text-green-200 text-sm"
                 id="point-success-feedback"
               >
                 <CheckCircle2 className="w-5 h-5 shrink-0 text-green-400" />
@@ -760,7 +759,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                 setRejectionReason(null);
                 setSuccess(false);
               }}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+              className="px-4 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
               id="reset-form-btn"
             >
               Clear Form
@@ -769,7 +768,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
             <button
               type="submit"
               disabled={isSubmitting || !content.trim()}
-              className="bg-orange-600 hover:bg-orange-500 disabled:bg-slate-300 text-white font-black text-sm px-7 py-3 rounded-xl shadow-lg shadow-orange-600/30 flex items-center gap-2 cursor-pointer transition-all disabled:cursor-not-allowed hover:scale-[1.02] active:scale-95"
+              className="bg-orange-600 hover:bg-orange-500 disabled:bg-slate-300 text-white font-black text-sm px-7 py-3 shadow-lg shadow-orange-600/30 flex items-center gap-2 cursor-pointer transition-all disabled:cursor-not-allowed hover:scale-[1.02] active:scale-95"
               id="submit-point-btn"
             >
               {isSubmitting ? (
@@ -792,13 +791,13 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* PANEL 1: Point Category Panel */}
         <div
-          className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-card-highlight flex flex-col justify-between"
+          className="bg-white border border-slate-200/80 p-5 shadow-card-highlight flex flex-col justify-between"
           id="point-category-panel"
         >
           <div>
             <div className="flex items-center justify-between gap-2 mb-3.5 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 shrink-0">
+                <div className="w-8 h-8 bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 shrink-0">
                   <Layers className="w-4 h-4" />
                 </div>
                 <div>
@@ -810,7 +809,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                   </p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-orange-100 text-orange-900 text-[10px] font-extrabold font-mono uppercase tracking-wider border border-orange-200 shrink-0">
+              <span className="px-2.5 py-1 bg-orange-100 text-orange-900 text-[10px] font-extrabold font-mono uppercase tracking-wider border border-orange-200 shrink-0">
                 {category}
               </span>
             </div>
@@ -826,7 +825,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                     type="button"
                     key={cat}
                     onClick={() => setCategory(cat)}
-                    className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden ${
+                    className={`p-2.5 border text-left text-xs transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden ${
                       isSelected ? style.activeClass : style.inactiveClass
                     }`}
                   >
@@ -844,13 +843,13 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
 
         {/* PANEL 2: Your Voice Forums Panel */}
         <div
-          className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-card-highlight flex flex-col justify-between"
+          className="bg-white border border-slate-200/80 p-5 shadow-card-highlight flex flex-col justify-between"
           id="your-voice-forums-panel"
         >
           <div>
             <div className="flex items-center justify-between gap-2 mb-3.5 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 shrink-0">
+                <div className="w-8 h-8 bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 shrink-0">
                   <Users className="w-4 h-4" />
                 </div>
                 <div>
@@ -862,7 +861,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                   </p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold font-mono uppercase tracking-wider border border-amber-200 shrink-0 max-w-[130px] truncate">
+              <span className="px-2.5 py-1 bg-amber-100 text-amber-900 text-[10px] font-extrabold font-mono uppercase tracking-wider border border-amber-200 shrink-0 max-w-[130px] truncate">
                 {voices.find(v => v.id === targetAudience)?.label || targetAudience}
               </span>
             </div>
@@ -924,7 +923,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                     type="button"
                     key={voice.id}
                     onClick={() => setTargetAudience(voice.id)}
-                    className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden ${
+                    className={`p-2.5 border text-left text-xs transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden ${
                       colors[voice.id] || fallbackClass
                     }`}
                   >

@@ -10,7 +10,7 @@ export interface Point {
   authorMoniker: string;
   tags?: string[];
   webAddress?: string;
-  media?: { url: string; type: "photo" | "video" | "audio"; name?: string }[];
+  media?: { url: string; type: "photo" | "video" | "audio" | "file"; name?: string }[];
   reactions: {
     hearHear: number;
     respect: number;
@@ -51,7 +51,7 @@ export interface ChatMessage {
   chatId: string;
   senderMoniker: string;
   content: string;
-  media?: { url: string; type: "photo" | "video" | "audio"; name?: string }[];
+  media?: { url: string; type: "photo" | "video" | "audio" | "file"; name?: string }[];
   createdAt: string;
 }
 

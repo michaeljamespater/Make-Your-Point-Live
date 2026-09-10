@@ -13,6 +13,7 @@ import MonetizationDashboard from "./components/MonetizationDashboard";
 import ChatSection from "./components/ChatSection";
 import FirstPageLanding from "./components/FirstPageLanding";
 import PrivateChatsPage from "./components/PrivateChatsPage";
+import ActionRibbon, { ActionMode, ActionTarget, ShowKind } from "./components/ActionRibbon";
 import {
   Megaphone,
   Sparkles,
@@ -152,6 +153,41 @@ export default function App() {
   // Stats and linking states
   const [stats, setStats] = useState({ totalPoints: 0, totalConnections: 0 });
   const [linkingFromPoint, setLinkingFromPoint] = useState<Point | null>(null);
+  const [actionMode, setActionMode] = useState<ActionMode>("ask");
+  const [actionTarget, setActionTarget] = useState<ActionTarget>("all");
+  const [actionMoniker, setActionMoniker] = useState("");
+  const [showKind, setShowKind] = useState<ShowKind>("photos");
+  const [ribbonSearch, setRibbonSearch] = useState("");
+
+  const displayPoints = React.useMemo(() => {
+    let list = [...sortedPoints];
+    if (actionMode === "search" && ribbonSearch.trim()) {
+      const q = ribbonSearch.toLowerCase();
+      list = list.filter(p =>
+        (p.title || "").toLowerCase().includes(q) ||
+        (p.content || "").toLowerCase().includes(q) ||
+        (p.authorMoniker || "").toLowerCase().includes(q)
+      );
+    }
+    if (actionMode === "show") {
+      list = list.filter(p => {
+        const media = p.media || [];
+        const text = `${p.title || ""} ${p.content || ""} ${p.category || ""}`.toLowerCase();
+        if (showKind === "photos") return media.some(m => m.type === "photo");
+        if (showKind === "videos") return media.some(m => m.type === "video");
+        if (showKind === "workmanship") return text.includes("work");
+        if (showKind === "creations") return text.includes("creat");
+        if (showKind === "designs") return text.includes("design");
+        if (showKind === "inventions") return text.includes("invent");
+        if (showKind === "innovations") return text.includes("innovat");
+        if (showKind === "services") return text.includes("service");
+        if (showKind === "wares") return text.includes("ware") || text.includes("goods") || text.includes("stock");
+        if (showKind === "conservations") return text.includes("preserv") || text.includes("restor") || text.includes("conserv");
+        return true;
+      });
+    }
+    return list;
+  }, [sortedPoints, actionMode, ribbonSearch, showKind]);
 
   // Curator Sandbox / Editing states
   const [isEditorMode, setIsEditorMode] = useState(false);
@@ -546,6 +582,8 @@ export default function App() {
     activeFilters.audience !== null ||
     activeFilters.search !== "";
 
+  const isFullAppPage = activePageName === "Make Your Point";
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200" id="app-root-container">
       {/* Always-visible Light / Dark + Owner tools */}
@@ -616,9 +654,9 @@ export default function App() {
             {/* 1. FIRST THING THE USER SEES: Main Title Header + 4 Large Main Buttons Grid */}
             <FirstPageLanding
               onMakeYourPoint={() => navigateToPage("Make Your Point", { showFirst: false, isChat: false, isPrivate: false, triggerMakePoint: true })}
-              onPointToPoint={() => navigateToPage("Point To Point", { showFirst: false, isChat: true, isPrivate: false, mobileTabTarget: 'browse' })}
-              onPrivateChats={() => navigateToPage("Private Chats", { showFirst: false, isChat: false, isPrivate: true, mobileTabTarget: 'browse' })}
-              onBrowsePoints={() => navigateToPage("All Points", { showFirst: false, isChat: false, isPrivate: false, resetPoint: true, resetFilters: true, mobileTabTarget: 'browse' })}
+              onPointToPoint={() => navigateToPage("Point To Point", { showFirst: false, isChat: false, isPrivate: false, triggerMakePoint: true })}
+              onPrivateChats={() => navigateToPage("Private Chats", { showFirst: false, isChat: false, isPrivate: false, triggerMakePoint: true })}
+              onBrowsePoints={() => navigateToPage("All Points", { showFirst: false, isChat: false, isPrivate: false, triggerMakePoint: true })}
               onSelectForum={(audienceId) => {
                 setActiveFilters({ category: null, subcategory: null, audience: audienceId, search: "" });
                 setSelectedPoint(null);
@@ -626,83 +664,54 @@ export default function App() {
                 setShowFirstPage(false);
                 setIsChatSectionOpen(false);
                 setIsPrivateChatsOpen(false);
-                setMobileTab("browse");
+                setMobileTab("post");
                 setActivePageName(`Voice Forum: ${audienceId}`);
               }}
               isDarkMode={isDarkMode}
               onToggleTheme={() => setIsDarkMode(prev => !prev)}
             />
-
-            {/* 2. ALL PREAMBLE, VOICE FORUMS DIRECTORY INDEX & PLATFORM BYLAWS BELOW THE 4 BUTTONS */}
-            <div className="w-full pt-8 border-t border-slate-200 dark:border-slate-800 space-y-8" id="preamble-and-directory-section">
-              <div className="flex flex-col md:flex-row gap-6 w-full">
-                {/* Voice Forums & Directory Index */}
-                <aside className="w-full md:w-80 lg:w-88 shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm" id="voice-forum-directory-container">
-                  <div className="mb-3 pb-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                      <Layers className="w-4 h-4 text-orange-600" />
-                      <span>Voice Forums & Directory</span>
-                    </h3>
-                    <span className="text-[10px] font-mono bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300 font-bold px-2 py-0.5 rounded-full">
-                      Index
-                    </span>
-                  </div>
-
-                  <CategoryIndex
-                    stats={stats}
-                    onFilterChange={(filters) => {
-                      setActiveFilters(filters);
-                      setSelectedPoint(null);
-                      setEditingPoint(null);
-                      setMobileTab('browse');
-                      if (filters.audience) {
-                        setActivePageName(`Voice Forum: ${filters.audience}`);
-                      } else if (filters.category) {
-                        setActivePageName(`Category: ${filters.category}`);
-                      } else {
-                        setActivePageName("All Points");
-                      }
-                      scrollToTop();
-                    }}
-                    activeFilters={activeFilters}
-                    points={points}
-                    onSelectPoint={(pt) => {
-                      setSelectedPoint(pt);
-                      setEditingPoint(null);
-                      setShowFirstPage(false);
-                      setIsPrivateChatsOpen(false);
-                      setIsChatSectionOpen(false);
-                      setMobileTab('browse');
-                      setActivePageName(`Point: ${pt.title}`);
-                      scrollToTop();
-                    }}
-                  />
-                </aside>
-
-                {/* Platform Manifesto, Bylaws & Preamble */}
-                <div className="flex-1 min-w-0 space-y-6">
-                  <PlatformManifesto 
-                    stats={stats} 
-                    isEditorMode={false} 
-                    manifestoRefresher={manifestoRefresher}
-                    onSaved={(data) => {
-                      setCurrentManifestoData(data);
-                      setManifestoRefresher(prev => prev + 1);
-                    }}
-                  />
-                  <OurWayOfLife />
-                  <DiscoverySurvey />
-                </div>
-              </div>
-            </div>
           </div>
         ) : (
           /* SUB-PAGES VIEW: Single Scrollable Container for 100% Linear Top-to-Bottom Flow */
           <div className="w-full space-y-6 flex-1 min-h-[92vh] overflow-y-auto pr-1" id="main-content-panel">
+            <ActionRibbon
+              mode={actionMode}
+              onMode={(m) => {
+                setActionMode(m);
+                if (m === "search") {
+                  setActiveFilters(prev => ({ ...prev, search: ribbonSearch }));
+                }
+              }}
+              target={actionTarget}
+              onTarget={(t) => {
+                setActionTarget(t);
+                if (t === "p2p") {
+                  setIsChatSectionOpen(true);
+                  setIsPrivateChatsOpen(false);
+                }
+                if (t === "private") {
+                  setIsPrivateChatsOpen(true);
+                  setIsChatSectionOpen(false);
+                }
+                if (t === "all") {
+                  setIsPrivateChatsOpen(false);
+                  setIsChatSectionOpen(false);
+                }
+              }}
+              moniker={actionMoniker}
+              onMoniker={setActionMoniker}
+              showKind={showKind}
+              onShowKind={setShowKind}
+              search={ribbonSearch}
+              onSearch={(v) => {
+                setRibbonSearch(v);
+                setActiveFilters(prev => ({ ...prev, search: v }));
+              }}
+            />
             
             {/* 1. Point To Point Group Chat Section - PHYSICAL TOP OF PAGE */}
             <AnimatePresence>
-              {isChatSectionOpen && (
+              {isFullAppPage && isChatSectionOpen && (
                 <motion.div
                   initial={{ opacity: 0, y: -15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -722,7 +731,7 @@ export default function App() {
             </AnimatePresence>
 
             {/* 2. Private Chats Messenger Section */}
-            {isPrivateChatsOpen ? (
+            {isFullAppPage && isPrivateChatsOpen ? (
               <PrivateChatsPage
                 initialMoniker={directChatMoniker}
                 onBackToFirstPage={() => navigateToPage("First Page", { showFirst: true, isChat: false, isPrivate: false })}
@@ -731,7 +740,7 @@ export default function App() {
             ) : (
               <>
                 {/* 3. Interactive Form / Discussion Thread / Point Sandbox Editor - AT TOP */}
-                {(editingPoint || selectedPoint || mobileTab === 'post' || linkingFromPoint) && (
+                {(isFullAppPage ? (editingPoint || selectedPoint || mobileTab === 'post' || linkingFromPoint) : true) && (
                   <div className="w-full space-y-4 pb-4 border-b border-slate-200 dark:border-slate-800" id="right-interactive-column">
                     <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
                       <button
@@ -836,8 +845,8 @@ export default function App() {
                   </div>
                 )}
 
-                {/* 4. Points Feed List & Search Toolbar (Only when NOT on Point To Point) */}
-                {!isChatSectionOpen && (
+                {/* 4. Points Feed — only on Make Your Point full page */}
+                {isFullAppPage && !isChatSectionOpen && (
                   <div className="flex flex-col space-y-6" id="left-points-panel">
                     
                     {/* Page Top Signature Header Panel: POINTS (Deep Teal Theme - only when browsing) */}
@@ -1052,7 +1061,7 @@ export default function App() {
                     ) : (
                       /* FLAT CONTINUOUS LIST VIEW */
                       <div className="space-y-4">
-                        {sortedPoints.map((pt, idx) => (
+                        {displayPoints.map((pt, idx) => (
                           <PointCard
                             key={pt.id}
                             point={pt}
