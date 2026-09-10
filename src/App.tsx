@@ -161,12 +161,17 @@ export default function App() {
 
   const displayPoints = React.useMemo(() => {
     let list = [...sortedPoints];
+    if (actionTarget === "moniker" && actionMoniker.trim()) {
+      const name = actionMoniker.trim().toLowerCase();
+      list = list.filter(p => (p.authorMoniker || "").toLowerCase().includes(name));
+    }
     if (actionMode === "search" && ribbonSearch.trim()) {
       const q = ribbonSearch.toLowerCase();
       list = list.filter(p =>
         (p.title || "").toLowerCase().includes(q) ||
         (p.content || "").toLowerCase().includes(q) ||
-        (p.authorMoniker || "").toLowerCase().includes(q)
+        (p.authorMoniker || "").toLowerCase().includes(q) ||
+        (p.tags || []).some(tag => String(tag).toLowerCase().includes(q))
       );
     }
     if (actionMode === "show") {
@@ -187,7 +192,7 @@ export default function App() {
       });
     }
     return list;
-  }, [sortedPoints, actionMode, ribbonSearch, showKind]);
+  }, [sortedPoints, actionMode, ribbonSearch, showKind, actionTarget, actionMoniker]);
 
   // Curator Sandbox / Editing states
   const [isEditorMode, setIsEditorMode] = useState(false);
@@ -692,6 +697,7 @@ export default function App() {
                 if (t === "private") {
                   setIsPrivateChatsOpen(true);
                   setIsChatSectionOpen(false);
+                  if (actionMoniker.trim()) setDirectChatMoniker(actionMoniker.trim());
                 }
                 if (t === "all") {
                   setIsPrivateChatsOpen(false);
@@ -731,7 +737,7 @@ export default function App() {
             </AnimatePresence>
 
             {/* 2. Private Chats Messenger Section */}
-            {isFullAppPage && isPrivateChatsOpen ? (
+            {(isPrivateChatsOpen && (isFullAppPage || actionTarget === "private")) ? (
               <PrivateChatsPage
                 initialMoniker={directChatMoniker}
                 onBackToFirstPage={() => navigateToPage("First Page", { showFirst: true, isChat: false, isPrivate: false })}
@@ -843,6 +849,43 @@ export default function App() {
                         </motion.div>
                       )}
                     </AnimatePresence>
+                  </div>
+                )}
+
+                {(actionMode === "search" || actionMode === "show") && actionTarget !== "private" && (
+                  <div className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 p-4" id="search-show-results">
+                    <h3 className="text-sm font-black uppercase mb-3">
+                      {actionMode === "search" ? "Search results" : `Show ${showKind}`}
+                      {actionTarget === "moniker" && actionMoniker ? ` — ${actionMoniker}` : " — all contributors"}
+                    </h3>
+                    {displayPoints.length === 0 ? (
+                      <p className="text-sm text-slate-600">No matches in the database yet.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {displayPoints.map(pt => (
+                          <button
+                            key={pt.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedPoint(pt);
+                              setShowFirstPage(false);
+                            }}
+                            className="border border-slate-300 p-3 text-left cursor-pointer bg-slate-50 dark:bg-slate-800"
+                          >
+                            <div className="text-[10px] font-bold uppercase text-orange-700">{pt.authorMoniker || "Anonymous"}</div>
+                            <div className="text-sm font-bold mt-1">{pt.title}</div>
+                            <div className="text-xs text-slate-600 mt-1 line-clamp-3">{pt.content}</div>
+                            {(pt.media || []).length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {(pt.media || []).map((m, i) => (
+                                  <span key={i} className="text-[10px] font-bold uppercase border px-1">{m.type}</span>
+                                ))}
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 

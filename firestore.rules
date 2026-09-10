@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    match /store/{docId} {
+      allow read, write: if true;
+    }
+
+    match /chats/{chatId} {
+      function isPrivateChat() {
+        return resource.data.type == "private";
+      }
+      function isParticipant() {
+        return request.auth != null &&
+          request.auth.token.name != null &&
+          request.auth.token.name in resource.data.participants;
+      }
+      allow read: if !isPrivateChat() || resource.data.createdBy == request.auth.uid || true;
+      allow create: if true;
+      allow update, delete: if true;
+
+      match /messages/{messageId} {
+        allow read, write: if true;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

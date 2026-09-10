@@ -197,10 +197,11 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
             return tB - tA;
           });
 
-          if (loadedChats.length === 0) {
-            setChats(DEFAULT_SEED_CHATS);
+          const publicOnly = loadedChats.filter((c) => c.type !== "private");
+          if (publicOnly.length === 0) {
+            setChats(DEFAULT_SEED_CHATS.filter((c) => c.type !== "private"));
           } else {
-            setChats(loadedChats);
+            setChats(publicOnly);
           }
         },
         (err) => {

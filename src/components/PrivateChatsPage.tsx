@@ -53,7 +53,7 @@ export default function PrivateChatsPage({
   const [userMoniker, setUserMoniker] = useState<string>(() => {
     if (typeof window !== "undefined") {
       try {
-        return localStorage.getItem("make_your_point_user_moniker") || "Participant";
+        return localStorage.getItem("myp_author_moniker") || localStorage.getItem("make_your_point_user_moniker") || "";
       } catch (e) {
         return "Participant";
       }
@@ -157,11 +157,18 @@ export default function PrivateChatsPage({
               new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
           );
 
-          setChats(loadedChats);
+          const me = (userMoniker || "").trim().toLowerCase();
+          const mineOnly = loadedChats.filter((c) => {
+            const parts = (c.participants || []).map((p) => String(p).trim().toLowerCase());
+            const creator = String(c.createdBy || "").trim().toLowerCase();
+            if (!me) return false;
+            return parts.includes(me) || creator === me;
+          });
 
-          // If active chat isn't set, select the first private chat or wait
-          if (!activeChatId && loadedChats.length > 0) {
-            setActiveChatId(loadedChats[0].id);
+          setChats(mineOnly);
+
+          if (activeChatId && !mineOnly.some((c) => c.id === activeChatId)) {
+            setActiveChatId(null);
           }
         },
         (error) => {
