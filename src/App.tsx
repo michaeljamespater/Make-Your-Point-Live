@@ -588,6 +588,14 @@ export default function App() {
     activeFilters.search !== "";
 
   const isFullAppPage = activePageName === "Make Your Point";
+  const forumTitles: Record<string, string> = {
+    Makers: "Makers — Builders and Crafters",
+    Creators: "Creators — Architects and Artists",
+    Innovators: "Innovators — Inventors and Trail Blazers",
+    Traders: "Traders — Buyers and Suppliers",
+    Preservers: "Preservers — Without a Past, there is no Future"
+  };
+  const pageHeading = forumTitles[activePageName] || activePageName;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200" id="app-root-container">
@@ -658,10 +666,16 @@ export default function App() {
           <div className="w-full space-y-10 py-2 sm:py-4" id="first-page-landing-wrapper">
             {/* 1. FIRST THING THE USER SEES: Main Title Header + 4 Large Main Buttons Grid */}
             <FirstPageLanding
-              onMakeYourPoint={() => navigateToPage("Make Your Point", { showFirst: false, isChat: false, isPrivate: false, triggerMakePoint: true })}
-              onPointToPoint={() => navigateToPage("Point To Point", { showFirst: false, isChat: false, isPrivate: false, triggerMakePoint: true })}
-              onPrivateChats={() => navigateToPage("Private Chats", { showFirst: false, isChat: false, isPrivate: false, triggerMakePoint: true })}
-              onBrowsePoints={() => navigateToPage("All Points", { showFirst: false, isChat: false, isPrivate: false, triggerMakePoint: true })}
+              onMakeYourPoint={() => navigateToPage("Make Your Point", { showFirst: false, isChat: false, isPrivate: false, triggerMakePoint: true, mobileTabTarget: "post" })}
+              onPointToPoint={() => {
+                setActiveFilters({ category: null, subcategory: null, audience: null, search: "" });
+                navigateToPage("Point To Point", { showFirst: false, isChat: true, isPrivate: false, mobileTabTarget: "browse" });
+              }}
+              onPrivateChats={() => navigateToPage("Private Chats", { showFirst: false, isChat: false, isPrivate: true, mobileTabTarget: "browse" })}
+              onBrowsePoints={() => {
+                setActiveFilters({ category: null, subcategory: null, audience: null, search: "" });
+                navigateToPage("Points", { showFirst: false, isChat: false, isPrivate: false, mobileTabTarget: "browse" });
+              }}
               onSelectForum={(audienceId) => {
                 setActiveFilters({ category: null, subcategory: null, audience: audienceId, search: "" });
                 setSelectedPoint(null);
@@ -669,8 +683,8 @@ export default function App() {
                 setShowFirstPage(false);
                 setIsChatSectionOpen(false);
                 setIsPrivateChatsOpen(false);
-                setMobileTab("post");
-                setActivePageName(`Voice Forum: ${audienceId}`);
+                setMobileTab("browse");
+                setActivePageName(audienceId);
               }}
               isDarkMode={isDarkMode}
               onToggleTheme={() => setIsDarkMode(prev => !prev)}
@@ -679,6 +693,9 @@ export default function App() {
         ) : (
           /* SUB-PAGES VIEW: Single Scrollable Container for 100% Linear Top-to-Bottom Flow */
           <div className="w-full space-y-6 flex-1 min-h-[92vh] overflow-y-auto pr-1" id="main-content-panel">
+            <div className="w-full border-b-2 border-orange-500 pb-2">
+              <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">{pageHeading}</h1>
+            </div>
             <ActionRibbon
               mode={actionMode}
               onMode={(m) => {
@@ -717,7 +734,7 @@ export default function App() {
             
             {/* 1. Point To Point Group Chat Section - PHYSICAL TOP OF PAGE */}
             <AnimatePresence>
-              {isFullAppPage && isChatSectionOpen && (
+              {isChatSectionOpen && activePageName === "Point To Point" && (
                 <motion.div
                   initial={{ opacity: 0, y: -15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -737,7 +754,7 @@ export default function App() {
             </AnimatePresence>
 
             {/* 2. Private Chats Messenger Section */}
-            {(isPrivateChatsOpen && (isFullAppPage || actionTarget === "private")) ? (
+            {(isPrivateChatsOpen || activePageName === "Private Chats") ? (
               <PrivateChatsPage
                 initialMoniker={directChatMoniker}
                 onBackToFirstPage={() => navigateToPage("First Page", { showFirst: true, isChat: false, isPrivate: false })}
@@ -746,7 +763,7 @@ export default function App() {
             ) : (
               <>
                 {/* 3. Interactive Form / Discussion Thread / Point Sandbox Editor - AT TOP */}
-                {(isFullAppPage ? (editingPoint || selectedPoint || mobileTab === 'post' || linkingFromPoint) : true) && (
+                {(editingPoint || selectedPoint || linkingFromPoint || (isFullAppPage && mobileTab === 'post')) && (
                   <div className="w-full space-y-4 pb-4 border-b border-slate-200 dark:border-slate-800" id="right-interactive-column">
                     <div className={`flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs ${isFullAppPage ? "" : "hidden"}`}>
                       <button
