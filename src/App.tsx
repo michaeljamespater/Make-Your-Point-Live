@@ -723,10 +723,12 @@ export default function App() {
                 if (t === "p2p") {
                   setIsChatSectionOpen(true);
                   setIsPrivateChatsOpen(false);
+                  setActivePageName("Point To Point");
                 }
                 if (t === "private") {
                   setIsPrivateChatsOpen(true);
                   setIsChatSectionOpen(false);
+                  setActivePageName("Private Chats");
                   if (actionMoniker.trim()) setDirectChatMoniker(actionMoniker.trim());
                 }
                 if (t === "all") {
@@ -1405,12 +1407,14 @@ export default function App() {
           <button
             type="button"
             onClick={() => {
-              if (window.history.length > 1) window.history.back();
-              else {
-                setShowFirstPage(true);
-                setIsChatSectionOpen(false);
-                setIsPrivateChatsOpen(false);
-              }
+              setShowFirstPage(true);
+              setIsChatSectionOpen(false);
+              setIsPrivateChatsOpen(false);
+              setIsPrivateChatsOpen(false);
+              setActivePageName("First Page");
+              setSelectedPoint(null);
+              setEditingPoint(null);
+              scrollToTop();
             }}
             className="w-full py-2 px-3 bg-slate-700 hover:bg-slate-600 text-white font-black text-xs border border-slate-500 cursor-pointer"
             id="btn-nav-back"

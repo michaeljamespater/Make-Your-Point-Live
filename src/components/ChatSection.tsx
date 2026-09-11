@@ -528,7 +528,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
     <div className="w-full max-w-7xl mx-auto space-y-4 h-full flex flex-col flex-1" id="chat-section-wrapper">
 
       {/* Page Top Signature Header Panel: POINT TO POINT (Dark Slate & Gold Amber Theme) */}
-      <div className="bg-slate-900 border-2 border-amber-500/50 rounded-2xl p-4 sm:p-5 shadow-2xl flex items-center justify-between gap-4">
+      <div className="bg-white border-2 border-amber-500 p-4 sm:p-5 flex items-center justify-between gap-4 text-slate-900">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
             <MessageSquare className="w-5 h-5 stroke-[2.2]" />
@@ -553,11 +553,11 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
         )}
       </div>
 
-      <div className="w-full bg-slate-900 border border-amber-500/30 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[640px] max-h-[85vh]">
+      <div className="w-full bg-white border border-amber-500/40 overflow-hidden flex flex-col md:flex-row min-h-[640px] max-h-[85vh] text-slate-900">
       {/* SIDEBAR: Conversation List & Switcher */}
-      <div className="w-full md:w-80 lg:w-96 bg-slate-950 border-r border-slate-800/80 flex flex-col shrink-0">
+      <div className="w-full md:w-80 lg:w-96 bg-slate-50 border-r border-slate-300 flex flex-col shrink-0">
         {/* Header & User Moniker Bar */}
-        <div className="p-4 border-b border-slate-800/80 bg-slate-900/50">
+        <div className="p-4 border-b border-slate-300 bg-white">
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
@@ -696,7 +696,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
       </div>
 
       {/* MAIN CHAT WINDOW */}
-      <div className="flex-1 flex flex-col bg-slate-900 min-w-0">
+      <div className="flex-1 flex flex-col bg-white min-w-0">
         {activeChat ? (
           <>
             {/* Active Chat Header */}
@@ -744,7 +744,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
             </div>
 
             {/* Messages Feed */}
-            <div ref={chatFeedRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-900/60">
+            <div ref={chatFeedRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
               {messages.length === 0 ? (
                 <div className="text-center py-16 px-4 text-slate-500 font-mono text-xs">
                   <MessageSquare className="w-10 h-10 text-slate-700 mx-auto mb-3" />

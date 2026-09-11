@@ -456,10 +456,10 @@ export default function PrivateChatsPage({
       </div>
 
       {/* Standalone Main Private Chat Container */}
-      <div className="bg-slate-950 border border-indigo-500/30 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[640px] max-h-[82vh]">
+      <div className="bg-white border border-slate-300 overflow-hidden flex flex-col md:flex-row min-h-[640px] max-h-[82vh] text-slate-900">
         
         {/* SIDEBAR: Private Messages List */}
-        <div className="w-full md:w-80 lg:w-96 bg-slate-900/90 border-r border-indigo-500/20 flex flex-col shrink-0">
+        <div className="w-full md:w-80 lg:w-96 bg-slate-50 border-r border-slate-300 flex flex-col shrink-0">
           
           {/* Top Actions in Sidebar */}
           <div className="p-4 border-b border-slate-800 space-y-3">
@@ -543,11 +543,11 @@ export default function PrivateChatsPage({
         </div>
 
         {/* MAIN CHAT AREA */}
-        <div className="flex-1 flex flex-col bg-slate-950">
+        <div className="flex-1 flex flex-col bg-white">
           {activeChat ? (
             <>
               {/* Active Conversation Header */}
-              <div className="p-4 border-b border-indigo-500/20 bg-slate-900/60 flex items-center justify-between gap-3">
+              <div className="p-4 border-b border-slate-300 bg-white flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300 font-bold text-sm">
                     {getRecipientMoniker(activeChat).charAt(0).toUpperCase()}
@@ -572,7 +572,7 @@ export default function PrivateChatsPage({
               </div>
 
               {/* Message Feed */}
-              <div ref={messageFeedRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-950/80">
+              <div ref={messageFeedRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
                 {messages.length === 0 ? (
                   <div className="text-center py-16 text-slate-500 space-y-2">
                     <Lock className="w-8 h-8 text-indigo-400/60 mx-auto mb-2" />
