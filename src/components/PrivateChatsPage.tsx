@@ -610,6 +610,19 @@ export default function PrivateChatsPage({
                               : "bg-slate-800 text-slate-100 rounded-bl-none border border-slate-700"
                           }`}
                         >
+                          {isMe && (
+                            <div className="flex gap-2 mb-2">
+                              <button type="button" className="text-[10px] font-bold bg-white text-slate-900 border border-slate-400 px-2 py-0.5 cursor-pointer" onClick={() => {
+                                const next = window.prompt("Edit message", msg.content || "");
+                                if (next == null) return;
+                                setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, content: next } : m));
+                              }}>Edit</button>
+                              <button type="button" className="text-[10px] font-bold bg-white text-red-700 border border-red-400 px-2 py-0.5 cursor-pointer" onClick={() => {
+                                if (!window.confirm("Delete this message?")) return;
+                                setMessages(prev => prev.filter(m => m.id !== msg.id));
+                              }}>Delete</button>
+                            </div>
+                          )}
                           {msg.content && (
                             <div className="flex items-start justify-between gap-2">
                               <p className="whitespace-pre-wrap flex-1">{msg.content}</p>

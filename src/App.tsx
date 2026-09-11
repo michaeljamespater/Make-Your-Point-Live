@@ -812,6 +812,7 @@ export default function App() {
                           <PointEditorPanel
                             point={editingPoint}
                             onCancel={() => setEditingPoint(null)}
+                            onDelete={() => handleDeletePoint(editingPoint)}
                             onSaved={(updatedFields) => {
                               setPoints(prev =>
                                 prev.map(p =>

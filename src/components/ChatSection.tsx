@@ -776,6 +776,21 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
                             : "bg-slate-800 border-slate-700 text-slate-200 rounded-tl-none"
                         }`}
                       >
+                        {isMe && (
+                          <div className="flex gap-2 mb-2">
+                            <button type="button" className="text-[10px] font-bold border border-slate-400 px-2 py-0.5 cursor-pointer bg-white text-slate-900" onClick={() => {
+                              const next = window.prompt("Edit message", msg.content || "");
+                              if (next == null) return;
+                              fetch(`/api/chat/messages/${msg.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: next }) }).catch(() => {});
+                              setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, content: next } : m));
+                            }}>Edit</button>
+                            <button type="button" className="text-[10px] font-bold border border-red-400 px-2 py-0.5 cursor-pointer bg-white text-red-700" onClick={() => {
+                              if (!window.confirm("Delete this message?")) return;
+                              fetch(`/api/chat/messages/${msg.id}`, { method: "DELETE" }).catch(() => {});
+                              setMessages(prev => prev.filter(m => m.id !== msg.id));
+                            }}>Delete</button>
+                          </div>
+                        )}
                         {msg.content && (
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed font-sans flex-1">

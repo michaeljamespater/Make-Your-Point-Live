@@ -76,6 +76,13 @@ export default function ReplySection({
     setTimeout(() => setCopiedReplyId(null), 2000);
   };
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
+  const [editingReplyText, setEditingReplyText] = useState("");
+
+  const myMoniker = (() => {
+    try { return (commenterMoniker || localStorage.getItem("myp_author_moniker") || "").trim().toLowerCase(); } catch { return (commenterMoniker || "").trim().toLowerCase(); }
+  })();
+  const canChangeReply = (author: string) => isEditorMode || (!!myMoniker && (author || "").trim().toLowerCase() === myMoniker);
 
   useEffect(() => {
     if (!expandedPhotoUrl) return;
@@ -474,9 +481,29 @@ export default function ReplySection({
                       {formatTime(reply.createdAt)}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-900 font-medium leading-relaxed whitespace-pre-line">
-                    {reply.content}
-                  </p>
+                  {editingReplyId === reply.id ? (
+                    <div className="space-y-2">
+                      <textarea className="w-full border border-slate-400 p-2 text-xs text-slate-900 bg-white" rows={3} value={editingReplyText} onChange={(e) => setEditingReplyText(e.target.value)} />
+                      <button type="button" className="px-2 py-1 text-[10px] font-bold bg-orange-600 text-white border-0 cursor-pointer" onClick={async () => {
+                        await fetch(`/api/points/${point.id}/replies/${reply.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: editingReplyText }) });
+                        setReplies(prev => prev.map(r => r.id === reply.id ? { ...r, content: editingReplyText } : r));
+                        setEditingReplyId(null);
+                      }}>Save</button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-900 font-medium leading-relaxed whitespace-pre-line">{reply.content}</p>
+                  )}
+                  {canChangeReply(reply.authorMoniker) && (
+                    <div className="flex gap-2 mt-2">
+                      <button type="button" className="px-2 py-1 text-[10px] font-bold border border-slate-400 cursor-pointer" onClick={() => { setEditingReplyId(reply.id); setEditingReplyText(reply.content); }}>Edit</button>
+                      <button type="button" className="px-2 py-1 text-[10px] font-bold border border-red-400 text-red-700 cursor-pointer" onClick={async () => {
+                        if (!window.confirm("Delete this reply?")) return;
+                        await fetch(`/api/points/${point.id}/replies/${reply.id}`, { method: "DELETE" });
+                        setReplies(prev => prev.filter(r => r.id !== reply.id));
+                        onReplyAdded();
+                      }}>Delete</button>
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>

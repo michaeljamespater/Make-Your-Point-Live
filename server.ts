@@ -313,6 +313,24 @@ app.post("/api/points/:id/replies", async (req, res) => {
   res.json(reply);
 });
 
+app.put("/api/points/:id/replies/:replyId", async (req, res) => {
+  const list = replies[req.params.id] || [];
+  const reply = list.find((r: any) => r.id === req.params.replyId);
+  if (!reply) return res.status(404).json({ error: "Not found" });
+  if (req.body.content != null) reply.content = req.body.content;
+  await saveAll();
+  res.json(reply);
+});
+
+app.delete("/api/points/:id/replies/:replyId", async (req, res) => {
+  const list = replies[req.params.id] || [];
+  replies[req.params.id] = list.filter((r: any) => r.id !== req.params.replyId);
+  const pt = points.find(p => p.id === req.params.id);
+  if (pt) pt.repliesCount = Math.max(0, (pt.repliesCount || 1) - 1);
+  await saveAll();
+  res.json({ ok: true });
+});
+
 app.post("/api/points/:id/sponsor", async (req, res) => {
   const pt = points.find(p => p.id === req.params.id);
   if (!pt) return res.status(404).json({ error: "Not found" });

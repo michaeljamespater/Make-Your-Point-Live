@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "motion/react";
 interface PointEditorPanelProps {
   point: Point;
   onCancel: () => void;
+  onDelete?: () => void;
   onSaved: (updatedFields: {
     title: string;
     content: string;
@@ -42,7 +43,7 @@ const CATEGORIES = [
   "Point of Delivery"
 ];
 
-export default function PointEditorPanel({ point, onCancel, onSaved }: PointEditorPanelProps) {
+export default function PointEditorPanel({ point, onCancel, onSaved, onDelete }: PointEditorPanelProps) {
   const [content, setContent] = useState(point.content);
   const [title, setTitle] = useState(point.title);
   const [category, setCategory] = useState(point.category);
@@ -193,6 +194,15 @@ export default function PointEditorPanel({ point, onCancel, onSaved }: PointEdit
             Point Editor <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 font-bold">Sandbox</span>
           </h3>
         </div>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="px-2 py-1 border border-red-400 text-red-700 text-[10px] font-bold cursor-pointer mr-2"
+          >
+            Delete
+          </button>
+        )}
         <button
           onClick={onCancel}
           className="p-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer"
