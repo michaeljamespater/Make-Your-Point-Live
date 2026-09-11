@@ -682,7 +682,7 @@ export default function PrivateChatsPage({
               </div>
 
               {/* Message Input Bar */}
-              <div className="p-3 border-t border-indigo-500/20 bg-slate-900/80">
+              <div className="p-3 border-t border-slate-300 bg-white">
                 {/* Upload Error Notice */}
                 {uploadError && (
                   <div className="mb-2 p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-center justify-between">
@@ -718,7 +718,7 @@ export default function PrivateChatsPage({
                     ref={fileInputRef}
                     onChange={handleFileUpload}
                     className="hidden"
-                    accept="image/*,video/*,audio/*"
+                    accept="image/*,video/*,audio/*,application/pdf,.pdf"
                     multiple
                   />
                   <button
@@ -736,7 +736,7 @@ export default function PrivateChatsPage({
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder={`Private message to ${getRecipientMoniker(activeChat)}...`}
                     rows={3}
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-y"
+                    className="flex-1 bg-white border border-slate-400 px-4 py-2.5 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-orange-500 resize-y"
                   />
 
                   <button

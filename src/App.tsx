@@ -588,6 +588,7 @@ export default function App() {
     activeFilters.search !== "";
 
   const isFullAppPage = activePageName === "Make Your Point";
+  const isForumPage = ["Makers", "Creators", "Innovators", "Traders", "Preservers"].includes(activePageName);
   const forumTitles: Record<string, string> = {
     Makers: "Makers — Builders and Crafters",
     Creators: "Creators — Architects and Artists",
@@ -685,6 +686,8 @@ export default function App() {
                 setIsPrivateChatsOpen(false);
                 setMobileTab("browse");
                 setActivePageName(audienceId);
+                setActionMode("search");
+                setActionTarget("all");
               }}
               isDarkMode={isDarkMode}
               onToggleTheme={() => setIsDarkMode(prev => !prev)}
@@ -697,11 +700,21 @@ export default function App() {
               <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">{pageHeading}</h1>
             </div>
             <ActionRibbon
+              variant={isForumPage ? "market" : "default"}
               mode={actionMode}
               onMode={(m) => {
                 setActionMode(m);
                 if (m === "search") {
                   setActiveFilters(prev => ({ ...prev, search: ribbonSearch }));
+                  setMobileTab("browse");
+                }
+                if (m === "ask" || m === "show") {
+                  setMobileTab("post");
+                  setSelectedPoint(null);
+                  setEditingPoint(null);
+                }
+                if (m === "answer") {
+                  setMobileTab("browse");
                 }
               }}
               target={actionTarget}
@@ -763,7 +776,7 @@ export default function App() {
             ) : (
               <>
                 {/* 3. Interactive Form / Discussion Thread / Point Sandbox Editor - AT TOP */}
-                {(editingPoint || selectedPoint || linkingFromPoint || (isFullAppPage && mobileTab === 'post')) && (
+                {(editingPoint || selectedPoint || linkingFromPoint || (isFullAppPage && mobileTab === 'post') || (isForumPage && (actionMode === "ask" || actionMode === "show") && mobileTab === "post")) && (
                   <div className="w-full space-y-4 pb-4 border-b border-slate-200 dark:border-slate-800" id="right-interactive-column">
                     <div className={`flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs ${isFullAppPage ? "" : "hidden"}`}>
                       <button
@@ -1153,9 +1166,7 @@ export default function App() {
                 {/* 5. Voice Forums & Directory Index — Make Your Point only */}
                 {isFullAppPage && (
                 <aside
-                  className={`w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm ${
-                    mobileTab === 'browse' ? 'block' : 'hidden md:block'
-                  }`}
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 shadow-sm"
                   id="left-voice-forum-panel"
                 >
                   <div className="mb-3 pb-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
@@ -1375,7 +1386,7 @@ export default function App() {
       {/* Centered Floating Control Group Stack - VISIBLE ON ALL PAGES */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 max-w-sm w-[92vw] sm:w-80 pointer-events-none" id="floating-nav-group">
         {/* ROW 1: Front Page & Back to Top (Side-by-Side Pair, Equal Size) */}
-        <div className="grid grid-cols-2 gap-2 w-full pointer-events-auto">
+        <div className="grid grid-cols-3 gap-2 w-full pointer-events-auto">
           <button
             onClick={() => {
               setShowFirstPage(true);
@@ -1389,6 +1400,22 @@ export default function App() {
           >
             <Megaphone className="w-3.5 h-3.5" />
             <span>Front Page</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) window.history.back();
+              else {
+                setShowFirstPage(true);
+                setIsChatSectionOpen(false);
+                setIsPrivateChatsOpen(false);
+              }
+            }}
+            className="w-full py-2 px-3 bg-slate-700 hover:bg-slate-600 text-white font-black text-xs border border-slate-500 cursor-pointer"
+            id="btn-nav-back"
+          >
+            Back
           </button>
 
           <button
