@@ -333,7 +333,7 @@ export default function ReplySection({
                 title="Point Made — Edit this Point"
               >
                 <Edit3 className="w-3 h-3 text-slate-600" />
-                <span>Point Made</span>
+                <span>Edit</span>
               </button>
             )}
             {onDelete && (

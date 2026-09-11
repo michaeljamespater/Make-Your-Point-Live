@@ -907,10 +907,17 @@ export default function App() {
                             <div className="text-[10px] font-bold uppercase text-orange-700">{pt.authorMoniker || "Anonymous"}</div>
                             <div className="text-sm font-bold mt-1">{pt.title}</div>
                             <div className="text-xs text-slate-600 mt-1 line-clamp-3">{pt.content}</div>
-                            {(pt.media || []).length > 0 && (
-                              <div className="mt-2 flex flex-wrap gap-1">
+                            {(pt.media || []).length > 0 && actionTarget !== "private" && (
+                              <div className="mt-2 space-y-2">
                                 {(pt.media || []).map((m, i) => (
-                                  <span key={i} className="text-[10px] font-bold uppercase border px-1">{m.type}</span>
+                                  <div key={i}>
+                                    {m.type === "video" && <video src={m.url} controls className="w-full max-h-40" />}
+                                    {m.type === "photo" && <img src={m.url} alt="" className="w-full max-h-40 object-contain" />}
+                                    {(m.type === "file" || (m.name || "").toLowerCase().endsWith(".pdf")) && (
+                                      <a href={m.url} target="_blank" rel="noreferrer" className="text-xs font-bold underline">File: {m.name || "PDF"}</a>
+                                    )}
+                                    {m.type === "audio" && <audio src={m.url} controls className="w-full" />}
+                                  </div>
                                 ))}
                               </div>
                             )}
@@ -921,8 +928,8 @@ export default function App() {
                   </div>
                 )}
 
-                {/* 4. Points Feed — only on Make Your Point full page */}
-                {isFullAppPage && !isChatSectionOpen && (
+                {/* 4. Points Feed — public pages (not private chat) */}
+                {(isFullAppPage || isForumPage || activePageName === "Points") && !isChatSectionOpen && !isPrivateChatsOpen && (
                   <div className="flex flex-col space-y-6" id="left-points-panel">
                     
                     {/* Page Top Signature Header Panel: POINTS (Deep Teal Theme - only when browsing) */}

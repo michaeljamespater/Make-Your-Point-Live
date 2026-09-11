@@ -421,7 +421,7 @@ ${divider}
           <span className="text-[10px] uppercase tracking-wider text-orange-900 bg-orange-100 border border-orange-300 px-2 py-0.5 rounded font-mono font-bold">
             {audienceLabel(point.targetAudience)}
           </span>
-          {!isEditorMode && (onEdit || onDelete) && (
+          {(onEdit || onDelete) && (
             <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
               {onEdit && (
                 <button
@@ -429,7 +429,7 @@ ${divider}
                   className="px-2 py-1 border border-slate-400 text-[10px] font-bold uppercase cursor-pointer"
                   title="Amend this point"
                 >
-                  Amend
+                  Edit
                 </button>
               )}
               {onDelete && (
@@ -481,6 +481,10 @@ ${divider}
                   style={{ maxHeight: "240px" }}
                   preload="metadata"
                 />
+              ) : item.type === "file" || (item.name || "").toLowerCase().endsWith(".pdf") ? (
+                <a href={item.url} target="_blank" rel="noreferrer" className="text-sm font-bold underline p-3 block">
+                  File: {item.name || "Download"}
+                </a>
               ) : item.type === "audio" ? (
                 <VoicePlayer
                   url={item.url}
