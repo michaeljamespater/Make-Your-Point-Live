@@ -269,8 +269,10 @@ app.put("/api/points/:id", async (req, res) => {
 function canAdminDeletePoint(req: any, pt: any) {
   const body = req.body || {};
   if (body.isEditorMode === true) return true;
+  if (body.createdHere === true) return true;
   const author = String(body.authorMoniker || "").trim().toLowerCase();
   const owner = String(pt.authorMoniker || "").trim().toLowerCase();
+  if (!owner || owner === "anonymous") return true;
   return Boolean(author && owner && author === owner);
 }
 

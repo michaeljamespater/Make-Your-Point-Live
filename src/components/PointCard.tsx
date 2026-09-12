@@ -344,19 +344,21 @@ ${divider}
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onEdit && onEdit(); }}
-          className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-400 text-slate-900 text-xs font-black uppercase cursor-pointer"
+          className="p-1.5 bg-slate-100 border border-slate-400 text-slate-800 cursor-pointer"
+          title="Edit"
         >
-          Edit
+          <Edit3 className="w-3.5 h-3.5" />
         </button>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onDelete && onDelete(); }}
-          className="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-400 text-red-700 text-xs font-black uppercase cursor-pointer"
+          className="p-1.5 bg-red-50 border border-red-400 text-red-700 cursor-pointer"
+          title="Delete"
         >
-          Delete
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
-      {isEditorMode && (
+      {false && isEditorMode && (
         <div 
           className="flex items-center justify-between bg-brand-bg/60 border border-brand-border/40 p-2.5 rounded-xl mb-4 gap-2 text-xs"
           onClick={(e) => e.stopPropagation()}
@@ -437,32 +439,7 @@ ${divider}
           <span className="text-[10px] uppercase tracking-wider text-orange-900 bg-orange-100 border border-orange-300 px-2 py-0.5 rounded font-mono font-bold">
             {audienceLabel(point.targetAudience)}
           </span>
-          {(onEdit || onDelete) && (
-            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-              {onEdit && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                  className="px-2 py-1 border border-slate-400 text-[10px] font-bold uppercase cursor-pointer"
-                  title="Amend this point"
-                >
-                  Edit
-                </button>
-              )}
-              {onDelete && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                  className="p-1 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 cursor-pointer"
-                  title="Delete this point"
-                  id={`btn-delete-card-${point.id}`}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-          )}
+          {false && (onEdit || onDelete) ? null : null}
         </div>
       </div>
 
@@ -495,7 +472,7 @@ ${divider}
                   src={item.url}
                   controls
                   className="max-h-[240px] w-full object-contain rounded-lg"
-                  style={{ maxHeight: "240px", filter: "blur(18px)" }}
+                  style={{ maxHeight: "240px" }}
                   preload="metadata"
                 />
                 <button

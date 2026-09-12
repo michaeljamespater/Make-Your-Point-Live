@@ -339,6 +339,14 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
       } else {
         setSuccess(true);
         setLastCreatedPoint(data);
+        try {
+          const ids = JSON.parse(localStorage.getItem("myp_my_point_ids") || "[]");
+          if (data?.id && Array.isArray(ids) && !ids.includes(data.id)) {
+            ids.push(data.id);
+            localStorage.setItem("myp_my_point_ids", JSON.stringify(ids));
+          }
+          if (authorMoniker.trim()) localStorage.setItem("myp_author_moniker", authorMoniker.trim());
+        } catch {}
         onPointCreated(data);
         // Reset form content
         setContent("");
@@ -579,7 +587,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                   {uploadedMedia.map((media, idx) => (
                     <div key={idx} className="relative group overflow-hidden border border-slate-300 aspect-video bg-slate-900 flex items-center justify-center p-2">
                       {media.type === "video" ? (
-                        <video src={media.url} className="w-full h-full object-cover" style={{ filter: "blur(18px)" }} muted />
+                        <video src={media.url} className="w-full h-full object-cover" muted />
                       ) : media.type === "file" ? (
                         <div className="w-full text-center px-2 text-white text-xs font-bold break-all">{media.name || "File"}</div>
                       ) : media.type === "audio" ? (

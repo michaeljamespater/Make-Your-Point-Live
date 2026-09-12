@@ -400,15 +400,47 @@ export default function App() {
     }
   };
 
+  const getDeviceId = () => {
+    try {
+      let id = localStorage.getItem("myp_device_id") || "";
+      if (!id) {
+        id = `dev-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        localStorage.setItem("myp_device_id", id);
+      }
+      return id;
+    } catch {
+      return "";
+    }
+  };
+
   const getMyMoniker = () => {
-    try { return localStorage.getItem("myp_author_moniker") || ""; } catch { return ""; }
+    try {
+      return (
+        localStorage.getItem("myp_author_moniker") ||
+        localStorage.getItem("make_your_point_user_moniker") ||
+        getDeviceId() ||
+        ""
+      );
+    } catch {
+      return "";
+    }
+  };
+
+  const ownsPointOnThisDevice = (point: Point) => {
+    try {
+      const ids = JSON.parse(localStorage.getItem("myp_my_point_ids") || "[]");
+      if (Array.isArray(ids) && ids.includes(point.id)) return true;
+    } catch {}
+    const mine = getMyMoniker().trim().toLowerCase();
+    const author = (point.authorMoniker || "").trim().toLowerCase();
+    if (mine && author && mine === author) return true;
+    if (!author || author === "anonymous") return true;
+    return false;
   };
 
   const canDeletePoint = (point: Point) => {
     if (isEditorMode) return true;
-    const mine = getMyMoniker().trim().toLowerCase();
-    if (!mine) return false;
-    return (point.authorMoniker || "").trim().toLowerCase() === mine;
+    return ownsPointOnThisDevice(point);
   };
 
   const handleDeletePoint = async (point: Point) => {
@@ -435,14 +467,19 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           authorMoniker: getMyMoniker(),
-          isEditorMode
+          isEditorMode,
+          createdHere: ownsPointOnThisDevice(point)
         })
       });
       if (!response.ok) {
         response = await fetch(`/api/points/${point.id}/delete`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ authorMoniker: getMyMoniker(), isEditorMode })
+          body: JSON.stringify({
+            authorMoniker: getMyMoniker(),
+            isEditorMode,
+            createdHere: ownsPointOnThisDevice(point)
+          })
         });
       }
       if (response.ok) {
@@ -934,7 +971,7 @@ export default function App() {
                               <div className="mt-2 space-y-2">
                                 {(pt.media || []).map((m, i) => (
                                   <div key={i}>
-                                    {m.type === "video" && <video src={m.url} controls className="w-full max-h-40" style={{ filter: "blur(18px)" }} />}
+                                    {m.type === "video" && <video src={m.url} controls className="w-full max-h-40" />}
                                     {m.type === "photo" && <img src={m.url} alt="" className="w-full max-h-40 object-contain" />}
                                     {(m.type === "file" || (m.name || "").toLowerCase().endsWith(".pdf")) && (
                                       <a href={m.url} target="_blank" rel="noreferrer" className="text-xs font-bold underline">File: {m.name || "PDF"}</a>
