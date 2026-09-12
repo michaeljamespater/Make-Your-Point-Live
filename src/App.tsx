@@ -13,6 +13,9 @@ import MonetizationDashboard from "./components/MonetizationDashboard";
 import ChatSection from "./components/ChatSection";
 import FirstPageLanding from "./components/FirstPageLanding";
 import PrivateChatsPage from "./components/PrivateChatsPage";
+import PageHelpPanel from "./components/PageHelpPanel";
+import DynamoAppMap from "./components/DynamoAppMap";
+import { helpKeyFor } from "./help/pageHelp";
 import ActionRibbon, { ActionMode, ActionTarget, ShowKind } from "./components/ActionRibbon";
 import {
   Megaphone,
@@ -41,7 +44,9 @@ import {
   Moon,
   Lock,
   Users,
-  ArrowLeft
+  ArrowLeft,
+  HelpCircle,
+  GitBranch
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -61,6 +66,8 @@ export default function App() {
 
   // Simple First Page (Landing Draft) state
   const [showFirstPage, setShowFirstPage] = useState<boolean>(true);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showAppMap, setShowAppMap] = useState(false);
   const [chatInitialFilter, setChatInitialFilter] = useState<"all" | "private" | "group">("all");
 
   // Dark / Light Theme state
@@ -681,6 +688,7 @@ export default function App() {
           onClick={() => {
             if (isEditorMode) {
               setIsEditorMode(false);
+              setShowAppMap(false);
               return;
             }
             let pin = "1234";
@@ -701,12 +709,48 @@ export default function App() {
         >
           {isEditorMode ? "Editor ON" : "Editor"}
         </button>
+        <button
+          type="button"
+          onClick={() => setShowHelp(true)}
+          className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wide border cursor-pointer bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+          title="Help for this page"
+          id="btn-page-help"
+        >
+          <HelpCircle className="w-3.5 h-3.5 inline mr-1" />
+          Help
+        </button>
+        {isEditorMode && (
+        <button
+          type="button"
+          onClick={() => {
+            setShowAppMap(true);
+            setShowFirstPage(false);
+            setIsChatSectionOpen(false);
+            setIsPrivateChatsOpen(false);
+            setActivePageName("App Map");
+          }}
+          className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wide border cursor-pointer bg-amber-500 text-slate-950 border-amber-400"
+          title="Admin only — page and button map"
+          id="btn-app-map"
+        >
+          <GitBranch className="w-3.5 h-3.5 inline mr-1" />
+          Map
+        </button>
+        )}
       </div>
+
+      <PageHelpPanel
+        pageKey={helpKeyFor(showFirstPage ? "First Page" : activePageName, !!selectedPoint)}
+        open={showHelp}
+        onClose={() => setShowHelp(false)}
+      />
 
       {/* Main Content Arena */}
       <main className={`flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 flex flex-col overflow-hidden ${showFirstPage ? 'py-4 sm:py-6' : 'py-2 sm:py-4'}`}>
 
-        {showFirstPage ? (
+        {showAppMap && isEditorMode ? (
+          <DynamoAppMap />
+        ) : showFirstPage ? (
           /* FRONT PAGE LANDING: 4 Large Main Buttons FIRST at top, Preamble & Directory Index BELOW */
           <div className="w-full space-y-10 py-2 sm:py-4" id="first-page-landing-wrapper">
             {/* 1. FIRST THING THE USER SEES: Main Title Header + 4 Large Main Buttons Grid */}
@@ -1474,6 +1518,13 @@ export default function App() {
           <button
             type="button"
             onClick={() => {
+              if (showAppMap) {
+                setShowAppMap(false);
+                setShowFirstPage(true);
+                setActivePageName("First Page");
+                scrollToTop();
+                return;
+              }
               if (selectedPoint || editingPoint) {
                 setSelectedPoint(null);
                 setEditingPoint(null);
