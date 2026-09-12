@@ -534,10 +534,10 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
             <MessageSquare className="w-5 h-5 stroke-[2.2]" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-amber-400 flex items-center gap-2">
+            <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-slate-900 flex items-center gap-2">
               POINT TO POINT
             </h1>
-            <p className="text-xs text-slate-300 font-medium">
+            <p className="text-xs text-slate-600 font-medium">
               Engage in group dialogues, town halls & active debate rooms.
             </p>
           </div>
@@ -564,7 +564,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
                 <Users className="w-4 h-4 text-amber-400" />
               </div>
               <div>
-                <h2 className="font-black text-slate-100 text-sm tracking-wide uppercase">POINT TO POINT</h2>
+                <h2 className="font-black text-slate-900 text-sm tracking-wide uppercase">POINT TO POINT</h2>
                 <p className="text-[11px] text-amber-400/90 font-mono">Group Dialogues & Town Halls</p>
               </div>
             </div>
@@ -580,15 +580,15 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
           </div>
 
           {/* Active User Moniker Setting */}
-          <div className="flex items-center gap-2 p-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono">
-            <User className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span className="text-slate-400 shrink-0">Moniker:</span>
+          <div className="flex items-center gap-2 p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono">
+            <User className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span className="text-slate-600 shrink-0">Moniker:</span>
             <input
               type="text"
               value={userMoniker}
               onChange={(e) => handleMonikerChange(e.target.value)}
               placeholder="Your Moniker..."
-              className="bg-transparent border-b border-slate-700 focus:border-amber-400 focus:outline-none text-amber-300 font-semibold text-xs w-full px-1"
+              className="bg-white border-b border-slate-300 focus:border-amber-500 focus:outline-none text-slate-900 font-semibold text-xs w-full px-1"
             />
           </div>
         </div>
@@ -700,7 +700,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
         {activeChat ? (
           <>
             {/* Active Chat Header */}
-            <div className="p-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0">
+            <div className="p-4 bg-white border-b border-slate-300 flex items-center justify-between gap-3 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
@@ -714,7 +714,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h2 className="font-bold text-slate-100 text-sm md:text-base truncate">
+                    <h2 className="font-bold text-slate-900 text-sm md:text-base truncate">
                       {activeChat.name}
                     </h2>
                     <span
@@ -776,8 +776,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
                             : "bg-slate-800 border-slate-700 text-slate-200 rounded-tl-none"
                         }`}
                       >
-                        {isMe && (
-                          <div className="flex gap-2 mb-2">
+                        <div className="flex gap-2 mb-2">
                             <button type="button" className="text-[10px] font-bold border border-slate-400 px-2 py-0.5 cursor-pointer bg-white text-slate-900" onClick={() => {
                               const next = window.prompt("Edit message", msg.content || "");
                               if (next == null) return;
@@ -790,7 +789,6 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
                               setMessages(prev => prev.filter(m => m.id !== msg.id));
                             }}>Delete</button>
                           </div>
-                        )}
                         {msg.content && (
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-xs md:text-sm whitespace-pre-wrap leading-relaxed font-sans flex-1">
@@ -874,7 +872,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
             </div>
 
             {/* Input Bar */}
-            <form onSubmit={handleSendMessage} className="p-3 bg-slate-950 border-t border-slate-800 flex flex-col gap-2 shrink-0">
+            <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-slate-300 flex flex-col gap-2 shrink-0">
               {/* Attached Media Previews */}
               {attachedMedia.length > 0 && (
                 <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -929,7 +927,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
                   onChange={(e) => setMessageText(e.target.value)}
                   placeholder={`Message ${activeChat.name} as ${userMoniker}...`}
                   rows={3}
-                  className="flex-1 bg-slate-900 border border-slate-800 focus:border-amber-500/50 focus:outline-none rounded-xl px-3.5 py-2 text-xs md:text-sm text-slate-100 placeholder-slate-500 font-sans resize-y"
+                  className="flex-1 bg-white border border-slate-300 focus:border-amber-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs md:text-sm text-slate-900 placeholder-slate-500 font-sans resize-y"
                 />
 
                 {/* Send Button */}

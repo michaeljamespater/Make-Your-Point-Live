@@ -35,12 +35,14 @@ import { db } from "../server/firebase";
 
 interface PrivateChatsPageProps {
   initialMoniker?: string | null;
+  initialPointText?: string;
   onBackToFirstPage: () => void;
   onBackToForum: () => void;
 }
 
 export default function PrivateChatsPage({
   initialMoniker,
+  initialPointText = "",
   onBackToFirstPage,
   onBackToForum
 }: PrivateChatsPageProps) {
@@ -61,7 +63,11 @@ export default function PrivateChatsPage({
     return "Participant";
   });
 
-  const [messageText, setMessageText] = useState("");
+  const [messageText, setMessageText] = useState(initialPointText || "");
+
+  useEffect(() => {
+    if (initialPointText && !messageText) setMessageText(initialPointText);
+  }, [initialPointText]);
   const [isUploading, setIsUploading] = useState(false);
   const [attachedMedia, setAttachedMedia] = useState<{ url: string; type: "photo" | "video" | "audio"; name?: string }[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -422,16 +428,16 @@ export default function PrivateChatsPage({
     <div className="w-full max-w-7xl mx-auto space-y-4 h-full flex flex-col flex-1" id="private-chats-page-container">
 
       {/* Page Top Signature Header Panel: PRIVATE CHATS (Deep Indigo Theme) */}
-      <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 border-2 border-indigo-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl flex items-center justify-between gap-4">
+      <div className="bg-white border-2 border-slate-300 p-4 sm:p-5 flex items-center justify-between gap-4 text-slate-900">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 shrink-0">
             <Lock className="w-5 h-5 stroke-[2.2]" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-indigo-300 flex items-center gap-2">
+            <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-slate-900 flex items-center gap-2">
               PRIVATE CHATS
             </h1>
-            <p className="text-xs text-indigo-200/80 font-medium">
+            <p className="text-xs text-slate-600 font-medium">
               Direct 1-on-1 private messaging & confidential communications.
             </p>
           </div>
@@ -610,8 +616,7 @@ export default function PrivateChatsPage({
                               : "bg-slate-800 text-slate-100 rounded-bl-none border border-slate-700"
                           }`}
                         >
-                          {isMe && (
-                            <div className="flex gap-2 mb-2">
+                          <div className="flex gap-2 mb-2">
                               <button type="button" className="text-[10px] font-bold bg-white text-slate-900 border border-slate-400 px-2 py-0.5 cursor-pointer" onClick={() => {
                                 const next = window.prompt("Edit message", msg.content || "");
                                 if (next == null) return;
@@ -622,7 +627,6 @@ export default function PrivateChatsPage({
                                 setMessages(prev => prev.filter(m => m.id !== msg.id));
                               }}>Delete</button>
                             </div>
-                          )}
                           {msg.content && (
                             <div className="flex items-start justify-between gap-2">
                               <p className="whitespace-pre-wrap flex-1">{msg.content}</p>

@@ -340,6 +340,22 @@ ${divider}
       }`}
       id={`point-card-${point.id}`}
     >
+      <div className="flex items-center gap-2 mb-3" onClick={(e) => e.stopPropagation()} id={`card-edit-delete-${point.id}`}>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onEdit && onEdit(); }}
+          className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-400 text-slate-900 text-xs font-black uppercase cursor-pointer"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onDelete && onDelete(); }}
+          className="px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-400 text-red-700 text-xs font-black uppercase cursor-pointer"
+        >
+          Delete
+        </button>
+      </div>
       {isEditorMode && (
         <div 
           className="flex items-center justify-between bg-brand-bg/60 border border-brand-border/40 p-2.5 rounded-xl mb-4 gap-2 text-xs"

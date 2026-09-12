@@ -32,7 +32,9 @@ import {
   Loader2,
   Mic,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Edit3,
+  Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { VoiceRecorder } from "./VoiceRecorder";
@@ -44,6 +46,8 @@ interface PointFormProps {
   onCancelLink?: () => void;
   onBrowseAllPoints?: () => void;
   simpleForm?: boolean;
+  onEditCreatedPoint?: (point: Point) => void;
+  onDeleteCreatedPoint?: (point: Point) => void;
 }
 
 const CATEGORIES = [
@@ -172,7 +176,7 @@ function compressImage(file: File, maxWidth = 900, maxHeight = 900, quality = 0.
   });
 }
 
-export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkingFromPoint, onCancelLink, onBrowseAllPoints, simpleForm = false }: PointFormProps) {
+export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkingFromPoint, onCancelLink, onBrowseAllPoints, onEditCreatedPoint, onDeleteCreatedPoint, simpleForm = false }: PointFormProps) {
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [subcategory, setSubcategory] = useState("");
@@ -421,6 +425,28 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              {lastCreatedPoint && onEditCreatedPoint && (
+                <button
+                  type="button"
+                  onClick={() => onEditCreatedPoint(lastCreatedPoint)}
+                  className="bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs py-1.5 px-3 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  id="btn-edit-published-point"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Edit</span>
+                </button>
+              )}
+              {lastCreatedPoint && onDeleteCreatedPoint && (
+                <button
+                  type="button"
+                  onClick={() => onDeleteCreatedPoint(lastCreatedPoint)}
+                  className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs py-1.5 px-3 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  id="btn-delete-published-point"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+              )}
               {lastCreatedPoint && onSelectCreatedPoint && (
                 <button
                   type="button"
@@ -747,6 +773,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
 
           {/* Bottom Submit / Reset Action Buttons */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
+            <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -766,6 +793,29 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
             >
               Clear Form
             </button>
+            {lastCreatedPoint && onEditCreatedPoint && (
+              <button
+                type="button"
+                onClick={() => onEditCreatedPoint(lastCreatedPoint)}
+                className="px-4 py-2.5 border border-slate-400 hover:bg-slate-100 text-slate-800 font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-1"
+                id="btn-edit-last-point"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                Edit
+              </button>
+            )}
+            {lastCreatedPoint && onDeleteCreatedPoint && (
+              <button
+                type="button"
+                onClick={() => onDeleteCreatedPoint(lastCreatedPoint)}
+                className="px-4 py-2.5 border border-red-300 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-1"
+                id="btn-delete-last-point"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete
+              </button>
+            )}
+            </div>
 
             <button
               type="submit"

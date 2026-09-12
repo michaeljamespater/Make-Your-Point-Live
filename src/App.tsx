@@ -404,12 +404,7 @@ export default function App() {
     try { return localStorage.getItem("myp_author_moniker") || ""; } catch { return ""; }
   };
 
-  const canDeletePoint = (point: Point) => {
-    if (isEditorMode) return true;
-    const mine = getMyMoniker().trim().toLowerCase();
-    if (!mine) return false;
-    return (point.authorMoniker || "").trim().toLowerCase() === mine;
-  };
+  const canDeletePoint = (_point: Point) => true;
 
   const handleDeletePoint = async (point: Point) => {
     if (!canDeletePoint(point)) {
@@ -772,8 +767,17 @@ export default function App() {
             {(isPrivateChatsOpen || activePageName === "Private Chats") ? (
               <PrivateChatsPage
                 initialMoniker={directChatMoniker}
-                onBackToFirstPage={() => navigateToPage("First Page", { showFirst: true, isChat: false, isPrivate: false })}
-                onBackToForum={() => navigateToPage("All Points", { showFirst: false, isChat: false, isPrivate: false })}
+                initialPointText={selectedPoint ? `${selectedPoint.title || ""}\n\n${selectedPoint.content || ""}`.trim() : ""}
+                onBackToFirstPage={() => {
+                  setIsPrivateChatsOpen(false);
+                  setActivePageName("Points");
+                  setShowFirstPage(false);
+                }}
+                onBackToForum={() => {
+                  setIsPrivateChatsOpen(false);
+                  setActivePageName("Points");
+                  setShowFirstPage(false);
+                }}
               />
             ) : (
               <>
@@ -844,8 +848,8 @@ export default function App() {
                             onSelectPoint={setSelectedPoint}
                             onStartLinking={handleStartLinking}
                             isEditorMode={isEditorMode}
-                            onEdit={canDeletePoint(selectedPoint) ? () => setEditingPoint(selectedPoint) : undefined}
-                            onDelete={canDeletePoint(selectedPoint) ? () => handleDeletePoint(selectedPoint) : undefined}
+                            onEdit={() => setEditingPoint(selectedPoint)}
+                            onDelete={() => handleDeletePoint(selectedPoint)}
                             onOpenSponsor={() => {
                               setSponsorPoint(selectedPoint);
                               setIsSponsorOpen(true);
@@ -873,6 +877,12 @@ export default function App() {
                               setSelectedPoint(newPoint);
                               if (isFullAppPage) setMobileTab('browse');
                             }}
+                            onEditCreatedPoint={(pt) => {
+                              setEditingPoint(pt);
+                              setSelectedPoint(null);
+                              if (isFullAppPage) setMobileTab('post');
+                            }}
+                            onDeleteCreatedPoint={(pt) => handleDeletePoint(pt)}
                             linkingFromPoint={linkingFromPoint}
                             onCancelLink={() => setLinkingFromPoint(null)}
                             onBrowseAllPoints={() => {
@@ -1125,12 +1135,12 @@ export default function App() {
                                       canMoveDown={idx < catPoints.length - 1}
                                       onMoveUp={() => handleMoveUp(idx)}
                                       onMoveDown={() => handleMoveDown(idx)}
-                                      onDelete={canDeletePoint(pt) ? () => handleDeletePoint(pt) : undefined}
-                                      onEdit={canDeletePoint(pt) ? () => {
+                                      onDelete={() => handleDeletePoint(pt)}
+                                      onEdit={() => {
                                         setEditingPoint(pt);
                                         setSelectedPoint(null);
                                         setMobileTab('post');
-                                      } : undefined}
+                                      }}
                                       onStartLinking={handleStartLinking}
                                       onSparkConnection={handleStartLinking}
                                       onOpenDirectChat={handleOpenDirectChat}
@@ -1156,12 +1166,12 @@ export default function App() {
                             canMoveDown={idx < sortedPoints.length - 1}
                             onMoveUp={() => handleMoveUp(idx)}
                             onMoveDown={() => handleMoveDown(idx)}
-                            onDelete={canDeletePoint(pt) ? () => handleDeletePoint(pt) : undefined}
-                            onEdit={canDeletePoint(pt) ? () => {
+                            onDelete={() => handleDeletePoint(pt)}
+                            onEdit={() => {
                               setEditingPoint(pt);
                               setSelectedPoint(null);
                               setMobileTab('post');
-                            } : undefined}
+                            }}
                             onStartLinking={handleStartLinking}
                             onSparkConnection={handleStartLinking}
                             onOpenDirectChat={handleOpenDirectChat}
@@ -1415,14 +1425,34 @@ export default function App() {
           <button
             type="button"
             onClick={() => {
-              setShowFirstPage(true);
-              setIsChatSectionOpen(false);
-              setIsPrivateChatsOpen(false);
-              setIsPrivateChatsOpen(false);
-              setActivePageName("First Page");
-              setSelectedPoint(null);
-              setEditingPoint(null);
-              scrollToTop();
+              if (selectedPoint || editingPoint) {
+                setSelectedPoint(null);
+                setEditingPoint(null);
+                setMobileTab("browse");
+                setActivePageName(isChatSectionOpen ? "Point To Point" : isPrivateChatsOpen ? "Private Chats" : "Points");
+                scrollToTop();
+                return;
+              }
+              if (isPrivateChatsOpen) {
+                setIsPrivateChatsOpen(false);
+                setDirectChatMoniker(null);
+                setActivePageName("Points");
+                setShowFirstPage(false);
+                scrollToTop();
+                return;
+              }
+              if (isChatSectionOpen) {
+                setIsChatSectionOpen(false);
+                setActivePageName("Points");
+                setShowFirstPage(false);
+                scrollToTop();
+                return;
+              }
+              if (!showFirstPage) {
+                setShowFirstPage(true);
+                setActivePageName("First Page");
+                scrollToTop();
+              }
             }}
             className="w-full py-2 px-3 bg-slate-700 hover:bg-slate-600 text-white font-black text-xs border border-slate-500 cursor-pointer"
             id="btn-nav-back"
