@@ -27,6 +27,7 @@ import {
   Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import FuelButton from "./FuelButton";
 import {
   collection,
   onSnapshot,
@@ -542,6 +543,8 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
             </p>
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <FuelButton id="btn-ptp-fuel" />
         {onClose && (
           <button
             onClick={onClose}
@@ -551,6 +554,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
             <X className="w-5 h-5" />
           </button>
         )}
+        </div>
       </div>
 
       <div className="w-full bg-white border border-amber-500/40 overflow-hidden flex flex-col md:flex-row min-h-[640px] max-h-[85vh] text-slate-900">

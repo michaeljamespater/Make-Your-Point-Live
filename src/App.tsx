@@ -15,6 +15,8 @@ import FirstPageLanding from "./components/FirstPageLanding";
 import PrivateChatsPage from "./components/PrivateChatsPage";
 import PageHelpPanel from "./components/PageHelpPanel";
 import DynamoAppMap from "./components/DynamoAppMap";
+import FuelButton from "./components/FuelButton";
+import HoverHelp from "./components/HoverHelp";
 import { helpKeyFor } from "./help/pageHelp";
 import ActionRibbon, { ActionMode, ActionTarget, ShowKind } from "./components/ActionRibbon";
 import {
@@ -651,6 +653,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200" id="app-root-container">
+      <HoverHelp />
       {/* Always-visible Light / Dark + Owner tools */}
       <div className="fixed top-3 right-3 z-[60] flex gap-1 shadow-lg" id="global-theme-toggle">
         <button
@@ -675,6 +678,7 @@ export default function App() {
           <Moon className="w-3.5 h-3.5 inline mr-1" />
           Dark
         </button>
+        <FuelButton id="btn-header-fuel" />
         <button
           type="button"
           onClick={() => setIsMonetizeOpen(true)}
@@ -713,7 +717,8 @@ export default function App() {
           type="button"
           onClick={() => setShowHelp(true)}
           className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wide border cursor-pointer bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-          title="Help for this page"
+          title="Left click: how to use this page. Hover any button for a short tip."
+          data-help="Left click for the full How to use menu for this page."
           id="btn-page-help"
         >
           <HelpCircle className="w-3.5 h-3.5 inline mr-1" />

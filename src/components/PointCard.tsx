@@ -345,7 +345,7 @@ ${divider}
           type="button"
           onClick={(e) => { e.stopPropagation(); onEdit && onEdit(); }}
           className="p-1.5 bg-slate-100 border border-slate-400 text-slate-800 cursor-pointer"
-          title="Edit"
+          title="Edit this point" data-help="Pencil: edit this point."
         >
           <Edit3 className="w-3.5 h-3.5" />
         </button>
@@ -353,7 +353,7 @@ ${divider}
           type="button"
           onClick={(e) => { e.stopPropagation(); onDelete && onDelete(); }}
           className="p-1.5 bg-red-50 border border-red-400 text-red-700 cursor-pointer"
-          title="Delete"
+          title="Delete this point" data-help="Bin: delete if you are the author or Admin."
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>

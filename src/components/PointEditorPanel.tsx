@@ -15,6 +15,7 @@ import {
   Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import FuelButton from "./FuelButton";
 
 interface PointEditorPanelProps {
   point: Point;
@@ -195,6 +196,7 @@ export default function PointEditorPanel({ point, onCancel, onSaved, onDelete }:
             Point Editor <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 font-bold">Sandbox</span>
           </h3>
         </div>
+        <FuelButton id="btn-editor-fuel" />
         {onDelete && (
           <button
             type="button"

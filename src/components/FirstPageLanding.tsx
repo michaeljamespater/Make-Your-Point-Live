@@ -1,5 +1,6 @@
 import React from "react";
 import { Megaphone, MessageSquare, Layers, Sparkles, ArrowRight, Sun, Moon, Lock } from "lucide-react";
+import FuelButton from "./FuelButton";
 import { motion } from "motion/react";
 
 interface FirstPageLandingProps {
@@ -44,6 +45,9 @@ export default function FirstPageLanding({
         </p>
       </div>
 
+      <div className="flex items-center justify-center mb-4">
+        <FuelButton id="btn-landing-fuel" />
+      </div>
       {/* Theme: Light / Dark */}
       <div className="flex items-center justify-center gap-2 mb-8" id="theme-toggle-row">
         <button
@@ -88,7 +92,7 @@ export default function FirstPageLanding({
           whileTap={{ scale: 0.98 }}
           onClick={onMakeYourPoint}
           className="group relative bg-gradient-to-br from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white p-7 shadow-xl shadow-orange-600/20 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-orange-400/30 min-h-[230px]"
-          id="btn-firstpage-make-your-point"
+          id="btn-firstpage-make-your-point" title="Write and publish a point" data-help="Opens Make Your Point to write and publish."
         >
           <div className="w-14 h-14 bg-white/15 backdrop-blur-md flex items-center justify-center mb-5 text-white group-hover:scale-110 transition-transform">
             <Megaphone className="w-7 h-7 stroke-[2.2]" />
@@ -113,7 +117,7 @@ export default function FirstPageLanding({
           whileTap={{ scale: 0.98 }}
           onClick={onPointToPoint}
           className="group relative bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-750 text-slate-100 p-7 shadow-xl shadow-slate-950/20 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-amber-500/30 min-h-[230px]"
-          id="btn-firstpage-point-to-point"
+          id="btn-firstpage-point-to-point" title="Open group chat" data-help="Opens Point To Point group rooms."
         >
           <div className="w-14 h-14 bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-5 text-amber-400 group-hover:scale-110 transition-transform">
             <MessageSquare className="w-7 h-7 stroke-[2.2]" />
@@ -138,7 +142,7 @@ export default function FirstPageLanding({
           whileTap={{ scale: 0.98 }}
           onClick={onPrivateChats}
           className="group relative bg-gradient-to-br from-indigo-900 to-slate-900 dark:from-indigo-950 dark:to-slate-900 hover:from-indigo-850 hover:to-slate-850 text-slate-100 p-7 shadow-xl shadow-indigo-950/20 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-indigo-500/40 min-h-[230px]"
-          id="btn-firstpage-private-chats"
+          id="btn-firstpage-private-chats" title="Open private chat" data-help="Opens one-to-one Private Chats."
         >
           <div className="w-14 h-14 bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center mb-5 text-indigo-300 group-hover:scale-110 transition-transform">
             <Lock className="w-7 h-7 stroke-[2.2]" />
@@ -163,7 +167,7 @@ export default function FirstPageLanding({
           whileTap={{ scale: 0.98 }}
           onClick={onBrowsePoints}
           className="group relative bg-gradient-to-br from-teal-900 via-teal-950 to-slate-950 dark:from-teal-900 dark:via-teal-950 dark:to-slate-950 hover:from-teal-800 hover:via-teal-900 hover:to-slate-900 text-white p-7 shadow-xl shadow-teal-950/40 flex flex-col justify-between items-center text-center transition-all cursor-pointer border border-teal-400/50 min-h-[230px]"
-          id="btn-firstpage-points"
+          id="btn-firstpage-points" title="Read published points" data-help="Opens the Points feed."
         >
           <div className="w-14 h-14 bg-teal-400/25 border border-teal-300/40 flex items-center justify-center mb-5 text-teal-200 group-hover:scale-110 transition-transform shadow-inner">
             <Layers className="w-7 h-7 stroke-[2.2]" />

@@ -20,7 +20,7 @@ export const PAGE_HELP: Record<HelpPageKey, { title: string; how: string[]; step
       "Tap Private Chats to message one person.",
       "Tap Points to read what others published.",
       "Light / Dark only changes colours.",
-      "Help (top right) always explains the screen you are on.",
+      "Fuel (amber) supports the platform. Help (top right) explains this screen.",
       "Later, Back goes one step. Front Page brings you here."
     ]
   },
@@ -33,6 +33,7 @@ export const PAGE_HELP: Record<HelpPageKey, { title: string; how: string[]; step
       "Add a Moniker (your name on the post). Use the same one next time so Edit and Delete work.",
       "Optional: pick a category and an audience.",
       "Optional: tags, a web link, photo, video, audio or file (picture / film / music icons).",
+      "Fuel on this page supports the author or the platform.",
       "Tap POINT MADE. The point appears on Points.",
       "Pencil edits that point. Bin deletes it — only you on this device, or Admin with Editor ON."
     ]

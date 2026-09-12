@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { VoiceRecorder } from "./VoiceRecorder";
+import FuelButton from "./FuelButton";
 
 interface PointFormProps {
   onPointCreated: (newPoint: any) => void;
@@ -386,6 +387,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
               </p>
             </div>
           </div>
+          <FuelButton id="btn-compose-fuel" />
         </div>
 
           {linkingFromPoint && onCancelLink && (
