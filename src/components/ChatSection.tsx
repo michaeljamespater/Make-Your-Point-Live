@@ -835,6 +835,7 @@ export default function ChatSection({ initialChatMoniker, initialFilter, onClose
                                     src={med.url}
                                     controls
                                     className="max-h-64 w-full rounded-lg bg-black"
+                                    style={{ filter: "blur(18px)" }}
                                   />
                                 )}
 

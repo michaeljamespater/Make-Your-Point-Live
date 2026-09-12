@@ -10,6 +10,9 @@ import {
   X,
   Sparkles,
   ShieldCheck,
+  Image,
+  Video,
+  Music,
   Image as ImageIcon,
   Film,
   Mic,
@@ -742,10 +745,14 @@ export default function PrivateChatsPage({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-indigo-300 transition-colors cursor-pointer border border-slate-700 shrink-0"
-                    title="Attach photo, video, or audio file"
+                    className="px-2 py-2 bg-white border border-slate-300 hover:border-orange-400 cursor-pointer shrink-0"
+                    title="Add photo, video, PDF or file"
                   >
-                    <Paperclip className="w-4 h-4" />
+                    <span className="flex items-center gap-1">
+                      <Image className="w-5 h-5 text-orange-600" />
+                      <Video className="w-5 h-5 text-orange-600" />
+                      <Music className="w-5 h-5 text-orange-600" />
+                    </span>
                   </button>
 
                   <textarea

@@ -495,7 +495,7 @@ ${divider}
                   src={item.url}
                   controls
                   className="max-h-[240px] w-full object-contain rounded-lg"
-                  style={{ maxHeight: "240px" }}
+                  style={{ maxHeight: "240px", filter: "blur(18px)" }}
                   preload="metadata"
                 />
                 <button

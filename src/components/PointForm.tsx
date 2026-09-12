@@ -579,7 +579,7 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
                   {uploadedMedia.map((media, idx) => (
                     <div key={idx} className="relative group overflow-hidden border border-slate-300 aspect-video bg-slate-900 flex items-center justify-center p-2">
                       {media.type === "video" ? (
-                        <video src={media.url} className="w-full h-full object-cover " muted />
+                        <video src={media.url} className="w-full h-full object-cover" style={{ filter: "blur(18px)" }} muted />
                       ) : media.type === "file" ? (
                         <div className="w-full text-center px-2 text-white text-xs font-bold break-all">{media.name || "File"}</div>
                       ) : media.type === "audio" ? (

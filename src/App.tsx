@@ -404,11 +404,16 @@ export default function App() {
     try { return localStorage.getItem("myp_author_moniker") || ""; } catch { return ""; }
   };
 
-  const canDeletePoint = (_point: Point) => true;
+  const canDeletePoint = (point: Point) => {
+    if (isEditorMode) return true;
+    const mine = getMyMoniker().trim().toLowerCase();
+    if (!mine) return false;
+    return (point.authorMoniker || "").trim().toLowerCase() === mine;
+  };
 
   const handleDeletePoint = async (point: Point) => {
     if (!canDeletePoint(point)) {
-      alert("You can only delete your own points.");
+      alert("Only the author or an admin can delete this point.");
       return;
     }
     if (!window.confirm("Are you sure you want to subtract (delete) this point? This will also remove all connected replies.")) {
@@ -430,20 +435,21 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           authorMoniker: getMyMoniker(),
-          isEditorMode: true
+          isEditorMode
         })
       });
       if (!response.ok) {
         response = await fetch(`/api/points/${point.id}/delete`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ authorMoniker: getMyMoniker(), isEditorMode: true })
+          body: JSON.stringify({ authorMoniker: getMyMoniker(), isEditorMode })
         });
       }
       if (response.ok) {
         fetchStats();
       } else {
         console.error("Failed to delete point");
+        fetchPoints();
       }
     } catch (err) {
       console.error("Error deleting point:", err);
@@ -928,7 +934,7 @@ export default function App() {
                               <div className="mt-2 space-y-2">
                                 {(pt.media || []).map((m, i) => (
                                   <div key={i}>
-                                    {m.type === "video" && <video src={m.url} controls className="w-full max-h-40" />}
+                                    {m.type === "video" && <video src={m.url} controls className="w-full max-h-40" style={{ filter: "blur(18px)" }} />}
                                     {m.type === "photo" && <img src={m.url} alt="" className="w-full max-h-40 object-contain" />}
                                     {(m.type === "file" || (m.name || "").toLowerCase().endsWith(".pdf")) && (
                                       <a href={m.url} target="_blank" rel="noreferrer" className="text-xs font-bold underline">File: {m.name || "PDF"}</a>

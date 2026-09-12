@@ -266,9 +266,20 @@ app.put("/api/points/:id", async (req, res) => {
   res.json(points[idx]);
 });
 
+function canAdminDeletePoint(req: any, pt: any) {
+  const body = req.body || {};
+  if (body.isEditorMode === true) return true;
+  const author = String(body.authorMoniker || "").trim().toLowerCase();
+  const owner = String(pt.authorMoniker || "").trim().toLowerCase();
+  return Boolean(author && owner && author === owner);
+}
+
 app.delete("/api/points/:id", async (req, res) => {
   const pt = points.find(p => p.id === req.params.id);
   if (!pt) return res.status(404).json({ error: "Not found" });
+  if (!canAdminDeletePoint(req, pt)) {
+    return res.status(403).json({ error: "Only the author or an admin can delete this point" });
+  }
   points = points.filter(p => p.id !== req.params.id);
   delete replies[req.params.id];
   delete sponsorships[req.params.id];
@@ -279,6 +290,9 @@ app.delete("/api/points/:id", async (req, res) => {
 app.post("/api/points/:id/delete", async (req, res) => {
   const pt = points.find(p => p.id === req.params.id);
   if (!pt) return res.status(404).json({ error: "Not found" });
+  if (!canAdminDeletePoint(req, pt)) {
+    return res.status(403).json({ error: "Only the author or an admin can delete this point" });
+  }
   points = points.filter(p => p.id !== req.params.id);
   delete replies[req.params.id];
   delete sponsorships[req.params.id];

@@ -255,6 +255,7 @@ export default function ReplySection({
                     src={item.url}
                     controls
                     className="max-h-[220px] w-full object-contain"
+                    style={{ filter: "blur(18px)" }}
                     preload="metadata"
                   />
                 ) : item.type === "audio" ? (
