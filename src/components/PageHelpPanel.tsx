@@ -16,24 +16,29 @@ export default function PageHelpPanel({
   return (
     <div className="fixed inset-0 z-[80] bg-slate-900/40 flex items-start justify-center p-4 pt-16" onClick={onClose}>
       <div
-        className="w-full max-w-lg bg-white border border-slate-300 shadow-xl text-slate-900"
+        className="w-full max-w-lg bg-white border border-slate-300 shadow-xl text-slate-900 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         id="page-help-panel"
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-orange-50">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-orange-50 sticky top-0">
           <h2 className="text-sm font-black uppercase tracking-wide flex items-center gap-2">
             <HelpCircle className="w-4 h-4 text-orange-600" />
-            Help — {help.title}
+            {help.title}
           </h2>
           <button type="button" onClick={onClose} className="p-1 cursor-pointer" title="Close help">
             <X className="w-4 h-4" />
           </button>
         </div>
-        <ul className="p-4 space-y-2 text-sm leading-relaxed">
-          {help.body.map((line, i) => (
-            <li key={i} className="pl-3 border-l-2 border-orange-400">{line}</li>
+        <div className="p-4 space-y-3 text-sm leading-relaxed">
+          {help.how.map((line, i) => (
+            <p key={i} className="font-semibold text-slate-800">{line}</p>
           ))}
-        </ul>
+          <ol className="list-decimal pl-5 space-y-2">
+            {help.steps.map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+          </ol>
+        </div>
       </div>
     </div>
   );

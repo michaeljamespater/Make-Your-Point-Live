@@ -740,7 +740,7 @@ export default function App() {
       </div>
 
       <PageHelpPanel
-        pageKey={helpKeyFor(showFirstPage ? "First Page" : activePageName, !!selectedPoint)}
+        pageKey={helpKeyFor(showFirstPage ? "First Page" : activePageName, { selectedPoint: !!selectedPoint, editing: !!editingPoint, editorMode: isEditorMode })}
         open={showHelp}
         onClose={() => setShowHelp(false)}
       />

@@ -3,90 +3,147 @@ export type HelpPageKey =
   | "Make Your Point"
   | "Points"
   | "Point Detail"
+  | "Point Editor"
   | "Point To Point"
   | "Private Chats"
+  | "Voice Forum"
+  | "Admin"
   | "App Map";
 
-export const PAGE_HELP: Record<HelpPageKey, { title: string; body: string[] }> = {
+export const PAGE_HELP: Record<HelpPageKey, { title: string; how: string[]; steps: string[] }> = {
   "First Page": {
-    title: "Front Page",
-    body: [
-      "This is the start screen.",
-      "Make Your Point — write and publish.",
-      "Point To Point — group chat rooms.",
-      "Private Chats — one-to-one messages.",
-      "Points — read the public feed.",
-      "Light / Dark changes theme. Admin and Editor are owner tools.",
-      "Back on later screens returns one step. Front Page always returns here."
+    title: "Front Page — how to use",
+    how: ["Choose where to go. Nothing is posted from this screen."],
+    steps: [
+      "Tap Make Your Point to write and publish.",
+      "Tap Point To Point to join a group room.",
+      "Tap Private Chats to message one person.",
+      "Tap Points to read what others published.",
+      "Light / Dark only changes colours.",
+      "Help (top right) always explains the screen you are on.",
+      "Later, Back goes one step. Front Page brings you here."
     ]
   },
   "Make Your Point": {
-    title: "Make Your Point",
-    body: [
-      "Type your title and your point.",
-      "Moniker is the name shown on the post. Use the same moniker later so Edit and Delete recognise you.",
-      "Optional: category, audience, tags, web link, photo, video, audio or file.",
-      "POINT MADE publishes to Points.",
-      "Pencil edits. Bin deletes. Only you (this device / same moniker) or Admin with Editor ON can delete."
+    title: "Make Your Point — how to use",
+    how: ["This page publishes a public point to the Points list."],
+    steps: [
+      "Type a short title.",
+      "Type your point in the large box.",
+      "Add a Moniker (your name on the post). Use the same one next time so Edit and Delete work.",
+      "Optional: pick a category and an audience.",
+      "Optional: tags, a web link, photo, video, audio or file (picture / film / music icons).",
+      "Tap POINT MADE. The point appears on Points.",
+      "Pencil edits that point. Bin deletes it — only you on this device, or Admin with Editor ON."
     ]
   },
   "Points": {
-    title: "Points",
-    body: [
-      "This is the public list of published points.",
-      "Each card has a pencil (Edit) and a bin (Delete) at the top.",
-      "Click the card body to open the full point and replies.",
-      "Use search and the side lists to filter by category or audience.",
-      "Grouped / All Points / Latest change how the list is sorted.",
-      "Delete only works for the author on this device or Admin (Editor ON)."
+    title: "Points — how to use",
+    how: ["This is the public feed. Read, filter, open, edit or delete your own."],
+    steps: [
+      "Scroll the cards. Each card is one published point.",
+      "Pencil = edit. Bin = delete. Only the author on this device or Admin (Editor ON) can delete.",
+      "Tap the card body (not the icons) to open the full point and replies.",
+      "Search box finds words, titles or monikers.",
+      "Side list: tap a category or audience to filter. All Points clears the filter.",
+      "Grouped stacks cards by category. Latest / Most Reacted changes order.",
+      "Back closes a filter or returns toward Front Page one step at a time."
     ]
   },
   "Point Detail": {
-    title: "Open point and replies",
-    body: [
-      "You are reading one point in full.",
-      "Reply at the bottom. Each reply has Edit and Delete.",
-      "Back closes this point and returns to Points — it does not jump to Front Page.",
-      "Link / chat icons start a related point or a private message with that author."
+    title: "Open point and replies — how to use",
+    how: ["You are inside one point. This is a sub-page of Points."],
+    steps: [
+      "Read the full text and any photos or videos.",
+      "Type a reply at the bottom and post it.",
+      "Each reply has Edit and Delete.",
+      "Pencil / bin on the point itself change or remove that point (author or Admin).",
+      "Chat-with-author opens Private Chats with their moniker.",
+      "Link starts a new point connected to this one.",
+      "Back returns to the Points list only — not Front Page."
+    ]
+  },
+  "Point Editor": {
+    title: "Edit point — how to use",
+    how: ["Sub-page of Make Your Point / Points. You opened the pencil."],
+    steps: [
+      "Change title, text, category, audience, tags or files.",
+      "Bin next to a file removes that file only.",
+      "Save writes the changes back to Points.",
+      "Cancel leaves the text as it was.",
+      "Back also leaves the editor and returns to the list."
     ]
   },
   "Point To Point": {
-    title: "Point To Point",
-    body: [
-      "Group rooms. Set your moniker first.",
-      "New group creates a room. Click a room to open it.",
-      "Type in the white box. Use the photo / video / audio icons to attach.",
-      "Edit and Delete sit on each message.",
-      "Back leaves the room list and returns to Points."
+    title: "Point To Point — how to use",
+    how: ["Group rooms. Public conversation, not a private DM."],
+    steps: [
+      "Type your Moniker first so others know who is speaking.",
+      "Tap New group. Name the room and (optional) a topic.",
+      "Tap a room on the left to open it (sub-page: the thread).",
+      "Type in the white box. Attach with photo / video / audio icons.",
+      "Send. Edit or Delete on a message changes only that message.",
+      "Back leaves the room, then leaves Point To Point, one step each time."
     ]
   },
   "Private Chats": {
-    title: "Private Chats",
-    body: [
-      "One-to-one messages. Light layout, same upload icons as Make Your Point.",
-      "New DM starts a chat by moniker.",
-      "If you opened this from a point, that point text is placed in the box.",
-      "Videos here play as uploaded.",
-      "Back returns to Points."
+    title: "Private Chats — how to use",
+    how: ["One person at a time. Not shown on the public Points list."],
+    steps: [
+      "Tap New DM and type the other person’s moniker.",
+      "Tap a name on the left to open that chat (sub-page: the thread).",
+      "Type in the white box. Same photo / video / audio icons as Make Your Point.",
+      "If you arrived from a point, that point text is already in the box — send or edit it.",
+      "Edit and Delete sit on each message.",
+      "Back returns to Points, not Front Page."
+    ]
+  },
+  "Voice Forum": {
+    title: "Voice forum filter — how to use",
+    how: ["Sub-page of Points. You opened one audience (Makers, Creators, and so on)."],
+    steps: [
+      "You are only seeing points aimed at that audience.",
+      "Use the cards the same way as Points: open, pencil, bin.",
+      "All Points clears the audience filter.",
+      "Back returns to the unfiltered Points list."
+    ]
+  },
+  "Admin": {
+    title: "Admin and Editor — how to use",
+    how: ["Owner tools. Ordinary users do not need these."],
+    steps: [
+      "Admin opens payout and owner settings.",
+      "Editor asks for the Owner PIN. Editor ON lets you edit or delete any point.",
+      "Map (only when Editor ON) is the Dynamo graph of pages and buttons.",
+      "Turn Editor OFF when you finish so the Map disappears for everyone else."
     ]
   },
   "App Map": {
-    title: "App Map (Dynamo style)",
-    body: [
-      "Pages are large nodes. Buttons are smaller nodes wired to the page they open.",
-      "Click a node to select it. Change Action, New name, or Notes.",
-      "KEEP / CUT / MOVE / RENAME / ADD tells me what to build next.",
-      "Copy JSON or Download JSON and send that file back in chat."
+    title: "App Map — how to use (Admin only)",
+    how: ["Visual map of pages and buttons. Not shown to the public."],
+    steps: [
+      "Large dark boxes are pages. Light boxes are buttons.",
+      "Orange lines show where a button goes.",
+      "Click a box. Set KEEP, CUT, MOVE, RENAME, SIMPLIFY or ADD.",
+      "Type a new name and notes.",
+      "Copy JSON or Download JSON and send that file back for build changes."
     ]
   }
 };
 
-export function helpKeyFor(activePageName: string, selectedPoint: boolean): HelpPageKey {
-  if (selectedPoint) return "Point Detail";
+export function helpKeyFor(
+  activePageName: string,
+  opts: { selectedPoint?: boolean; editing?: boolean; editorMode?: boolean }
+): HelpPageKey {
+  if (opts.editing) return "Point Editor";
+  if (opts.selectedPoint) return "Point Detail";
   if (activePageName === "First Page") return "First Page";
   if (activePageName === "Make Your Point") return "Make Your Point";
   if (activePageName === "Point To Point") return "Point To Point";
   if (activePageName === "Private Chats") return "Private Chats";
   if (activePageName === "App Map") return "App Map";
+  if (["Makers", "Creators", "Innovators", "Traders", "Preservers"].includes(activePageName)) {
+    return "Voice Forum";
+  }
   return "Points";
 }
