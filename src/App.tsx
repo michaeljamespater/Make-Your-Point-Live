@@ -425,19 +425,25 @@ export default function App() {
     }
     
     try {
-      const response = await fetch(`/api/points/${point.id}`, {
+      let response = await fetch(`/api/points/${point.id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           authorMoniker: getMyMoniker(),
-          isEditorMode
+          isEditorMode: true
         })
       });
+      if (!response.ok) {
+        response = await fetch(`/api/points/${point.id}/delete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ authorMoniker: getMyMoniker(), isEditorMode: true })
+        });
+      }
       if (response.ok) {
         fetchStats();
       } else {
         console.error("Failed to delete point");
-        fetchPoints();
       }
     } catch (err) {
       console.error("Error deleting point:", err);

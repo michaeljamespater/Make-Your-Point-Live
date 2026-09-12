@@ -149,7 +149,8 @@ export default function PointEditorPanel({ point, onCancel, onSaved, onDelete }:
           targetAudience,
           tags: parsedTags,
           webAddress: webAddress.trim(),
-          media
+          media,
+          _clearMedia: !media || media.length === 0
         })
       });
 
@@ -270,10 +271,10 @@ export default function PointEditorPanel({ point, onCancel, onSaved, onDelete }:
                   <span className="font-bold uppercase">{m.type}</span>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (window.confirm("Remove this file from the point?")) {
-                        setMedia(prev => prev.filter((_, i) => i !== idx));
-                      }
+                    onClick={async () => {
+                      if (!window.confirm("Remove this file from the point?")) return;
+                      setMedia(prev => prev.filter((_, i) => i !== idx));
+                      await fetch(`/api/points/${point.id}/media/${idx}`, { method: "DELETE" });
                     }}
                     className="flex items-center gap-1 text-red-700 font-bold cursor-pointer"
                   >

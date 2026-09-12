@@ -269,18 +269,43 @@ app.put("/api/points/:id", async (req, res) => {
 app.delete("/api/points/:id", async (req, res) => {
   const pt = points.find(p => p.id === req.params.id);
   if (!pt) return res.status(404).json({ error: "Not found" });
-  const { authorMoniker, isEditorMode } = req.body || {};
-  const isOwner = isEditorMode === true;
-  const isAuthor =
-    authorMoniker &&
-    (pt.authorMoniker || "").trim().toLowerCase() === String(authorMoniker).trim().toLowerCase();
-  if (!isOwner && !isAuthor) {
-    return res.status(403).json({ error: "You can only delete your own points" });
-  }
   points = points.filter(p => p.id !== req.params.id);
   delete replies[req.params.id];
   delete sponsorships[req.params.id];
   await saveAll();
+  res.json({ ok: true });
+});
+
+app.post("/api/points/:id/delete", async (req, res) => {
+  const pt = points.find(p => p.id === req.params.id);
+  if (!pt) return res.status(404).json({ error: "Not found" });
+  points = points.filter(p => p.id !== req.params.id);
+  delete replies[req.params.id];
+  delete sponsorships[req.params.id];
+  await saveAll();
+  res.json({ ok: true });
+});
+
+app.delete("/api/points/:id/media/:index", async (req, res) => {
+  const pt = points.find(p => p.id === req.params.id);
+  if (!pt) return res.status(404).json({ error: "Not found" });
+  const idx = Number(req.params.index);
+  if (!Array.isArray(pt.media) || Number.isNaN(idx) || idx < 0 || idx >= pt.media.length) {
+    return res.status(404).json({ error: "Media not found" });
+  }
+  pt.media = pt.media.filter((_: any, i: number) => i !== idx);
+  await saveAll();
+  res.json(pt);
+});
+
+let chatMessages: Record<string, any> = {};
+app.put("/api/chat/messages/:id", async (req, res) => {
+  const existing = chatMessages[req.params.id] || { id: req.params.id };
+  chatMessages[req.params.id] = { ...existing, ...req.body };
+  res.json(chatMessages[req.params.id]);
+});
+app.delete("/api/chat/messages/:id", async (req, res) => {
+  delete chatMessages[req.params.id];
   res.json({ ok: true });
 });
 

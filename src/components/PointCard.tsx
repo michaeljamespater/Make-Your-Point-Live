@@ -490,6 +490,7 @@ ${divider}
           {point.media.map((item, idx) => (
             <div key={idx} className="relative rounded-xl overflow-hidden border border-slate-300 bg-slate-900/5 p-1 max-h-[240px] flex items-center justify-center group" onClick={(e) => e.stopPropagation()}>
               {item.type === "video" ? (
+                <div className="relative w-full">
                 <video
                   src={item.url}
                   controls
@@ -497,6 +498,19 @@ ${divider}
                   style={{ maxHeight: "240px" }}
                   preload="metadata"
                 />
+                <button
+                  type="button"
+                  className="absolute top-2 right-2 px-2 py-1 bg-white text-red-700 border border-red-400 text-[10px] font-black uppercase cursor-pointer z-10"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (!window.confirm("Delete this video?")) return;
+                    await fetch(`/api/points/${point.id}/media/${idx}`, { method: "DELETE" });
+                    window.location.reload();
+                  }}
+                >
+                  Delete video
+                </button>
+                </div>
               ) : item.type === "file" || (item.name || "").toLowerCase().endsWith(".pdf") ? (
                 <a href={item.url} target="_blank" rel="noreferrer" className="text-sm font-bold underline p-3 block">
                   File: {item.name || "Download"}
