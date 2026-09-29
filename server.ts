@@ -337,28 +337,45 @@ app.post("/api/discovery/vote", async (req, res) => {
 
 app.post("/api/check-reality", (req, res) => res.json({ ok: true }));
 app.post("/api/spellcheck", (req, res) => res.json({ corrected: req.body?.text || "", suggestions: [] }));
+function mediaTypeFrom(fileType: string) {
+  if (fileType.startsWith("video/")) return "video";
+  if (fileType.startsWith("audio/")) return "audio";
+  if (fileType.startsWith("image/")) return "photo";
+  return "file";
+}
+
+function writeUpload(buffer: Buffer, filename: string, fileType: string) {
+  ensureDirs();
+  const safeName = String(filename || `file-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storedName = `${Date.now()}-${safeName}`;
+  fs.writeFileSync(path.join(uploadDir, storedName), buffer);
+  const url = `/uploads/${storedName}`;
+  console.log("  Stored media on disk:", url, buffer.length, "bytes");
+  return { url, type: mediaTypeFrom(fileType), name: filename || safeName };
+}
+
 app.post("/api/upload", async (req, res) => {
-  const { base64Data, fileType, filename } = req.body;
-  const type = fileType?.startsWith("video/")
-    ? "video"
-    : fileType?.startsWith("audio/")
-      ? "audio"
-      : fileType?.startsWith("image/")
-        ? "photo"
-        : "file";
+  const { base64Data, fileType, filename } = req.body || {};
   if (!base64Data) return res.status(400).json({ error: "No file data" });
   try {
-    ensureDirs();
     const raw = String(base64Data).includes(",") ? String(base64Data).split(",")[1] : String(base64Data);
     const buffer = Buffer.from(raw, "base64");
-    const safeName = String(filename || `file-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
-    const storedName = `${Date.now()}-${safeName}`;
-    fs.writeFileSync(path.join(uploadDir, storedName), buffer);
-    const url = `/uploads/${storedName}`;
-    console.log("  Stored media on disk:", url);
-    return res.json({ url, type, name: filename || safeName });
+    return res.json(writeUpload(buffer, filename, fileType || ""));
   } catch (err) {
     console.error("  Disk upload failed:", err);
+    return res.status(500).json({ error: "File could not be stored on the server." });
+  }
+});
+
+app.post("/api/upload-bin", express.raw({ type: "*/*", limit: "160mb" }), async (req, res) => {
+  try {
+    const buffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || []);
+    if (!buffer.length) return res.status(400).json({ error: "No file data" });
+    const filename = String(req.query.filename || req.headers["x-filename"] || `file-${Date.now()}`);
+    const fileType = String(req.query.fileType || req.headers["x-file-type"] || "");
+    return res.json(writeUpload(buffer, filename, fileType));
+  } catch (err) {
+    console.error("  Disk binary upload failed:", err);
     return res.status(500).json({ error: "File could not be stored on the server." });
   }
 });

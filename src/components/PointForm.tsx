@@ -239,32 +239,48 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
           continue;
         }
 
-        // Convert file to base64 with compression for images
-        const base64Data = await compressImage(file);
-
-        let finalUrl = base64Data;
+        let finalUrl = "";
         let finalType: "photo" | "video" | "audio" | "file" = isVideo ? "video" : isAudio ? "audio" : isImage ? "photo" : "file";
 
         try {
-          const response = await fetch("/api/upload", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              filename: file.name,
-              fileType: file.type,
-              base64Data,
-            }),
-          });
-
-          if (!response.ok) {
-            const errBody = await response.json().catch(() => ({}));
-            throw new Error(errBody.error || "Upload failed");
+          if (isVideo || isAudio) {
+            const response = await fetch(
+              `/api/upload-bin?filename=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": file.type || "application/octet-stream",
+                  "X-Filename": file.name,
+                  "X-File-Type": file.type
+                },
+                body: file
+              }
+            );
+            if (!response.ok) {
+              const errBody = await response.json().catch(() => ({}));
+              throw new Error(errBody.error || "Upload failed");
+            }
+            const data = await response.json();
+            finalUrl = data.url;
+            finalType = data.type;
+          } else {
+            const base64Data = await compressImage(file);
+            finalUrl = base64Data;
+            const response = await fetch("/api/upload", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                filename: file.name,
+                fileType: file.type,
+                base64Data
+              })
+            });
+            if (response.ok) {
+              const data = await response.json();
+              finalUrl = data.url;
+              finalType = data.type;
+            }
           }
-          const data = await response.json();
-          finalUrl = data.url;
-          finalType = data.type;
         } catch (fetchErr: any) {
           if (isVideo) {
             setUploadError(fetchErr.message || "Video upload failed.");
