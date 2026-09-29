@@ -267,14 +267,14 @@ export default function PointForm({ onPointCreated, onSelectCreatedPoint, linkin
           finalType = data.type;
         } catch (fetchErr: any) {
           if (isVideo) {
-            setUploadError(fetchErr.message || "Video upload failed. Deploy latest code and enable Firebase Storage.");
+            setUploadError(fetchErr.message || "Video upload failed.");
             continue;
           }
           console.warn("Upload API endpoint fallback to inlined Data URL:", fetchErr);
         }
 
-        if (isVideo && !String(finalUrl).startsWith("http")) {
-          setUploadError("Video was not stored. Try again after deploy.");
+        if (isVideo && !(String(finalUrl).startsWith("http") || String(finalUrl).startsWith("/uploads/"))) {
+          setUploadError("Video was not stored on the server.");
           continue;
         }
 

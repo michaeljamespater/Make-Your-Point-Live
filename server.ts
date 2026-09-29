@@ -2,6 +2,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 
 dotenv.config();
@@ -29,115 +30,22 @@ let manifesto = {
 let discoveryStats: Record<string, number> = {};
 let paypalConfig = { paypalEmail: "", paypalMeLink: "" };
 
-let firestore: any = null;
-let useFirebase = false;
 let storeLoaded = false;
 let lastSavedPointCount = 0;
+const dataDir = process.env.DATA_DIR || path.join(projectRoot, "data");
+const uploadDir = path.join(dataDir, "uploads");
+const storeFile = path.join(dataDir, "store.json");
 
-async function connectDb() {
-  const fs = await import("fs");
-  let sa = process.env.FIREBASE_SERVICE_ACCOUNT || "";
-  const filePath =
-    process.env.FIREBASE_SERVICE_ACCOUNT_FILE ||
-    "/etc/secrets/FIREBASE_SERVICE_ACCOUNT" ||
-    "/etc/secrets/firebase.json";
-  if (!sa) {
-    const candidates = [
-      process.env.FIREBASE_SERVICE_ACCOUNT_FILE,
-      "/etc/secrets/FIREBASE_SERVICE_ACCOUNT",
-      "/etc/secrets/firebase.json",
-      "/etc/secrets/serviceAccount.json",
-      "/etc/secrets/NEW_SECRET",
-      path.join(projectRoot, "NEW_SECRET"),
-      path.join(projectRoot, "firebase.json"),
-      path.join(projectRoot, "serviceAccount.json")
-    ];
-    for (const p of candidates) {
-      if (p && fs.existsSync(p)) {
-        sa = fs.readFileSync(p, "utf8");
-        console.log("  Loaded Firebase key from file:", p);
-        break;
-      }
-    }
-    if (!sa) {
-      try {
-        const secretsDir = "/etc/secrets";
-        if (fs.existsSync(secretsDir)) {
-          const files = fs.readdirSync(secretsDir);
-          console.log("  Secret files present:", files.join(", ") || "(none)");
-          const ordered = [
-            ...files.filter(f => f.includes("firebase") || f.includes("adminsdk")),
-            ...files.filter(f => !f.startsWith(".."))
-          ];
-          for (const f of ordered) {
-            if (f.startsWith("..")) continue;
-            const full = path.join(secretsDir, f);
-            try {
-              const content = fs.readFileSync(full, "utf8").trim();
-              console.log("  Checking secret file:", f, "length:", content.length);
-              if (content.includes("private_key") || content.includes("service_account")) {
-                sa = content;
-                console.log("  Loaded Firebase key from secret file:", full);
-                break;
-              }
-            } catch (readErr) {
-              console.log("  Could not read", f, String(readErr));
-            }
-          }
-        }
-      } catch (e) {
-        console.log("  Could not list /etc/secrets", String(e));
-      }
-    }
-  }
-  if (!sa) {
-    try {
-      const rootFiles = fs.readdirSync(projectRoot);
-      console.log("  Project root files:", rootFiles.filter(f => !f.startsWith(".") && f !== "node_modules" && f !== "dist").join(", "));
-      for (const f of rootFiles) {
-        if (f === "NEW_SECRET" || f === "firebase.json" || f.endsWith(".json")) {
-          const content = fs.readFileSync(path.join(projectRoot, f), "utf8");
-          if (content.includes("private_key") || content.includes("service_account")) {
-            sa = content;
-            console.log("  Loaded Firebase key from root file:", f);
-            break;
-          }
-        }
-      }
-    } catch (e) {
-      console.log("  Could not scan project root");
-    }
-  }
-  if (!sa) {
-    console.log("  No FIREBASE_SERVICE_ACCOUNT — memory only (data lost on restart)");
-    return;
-  }
-  try {
-    const adminMod = await import("firebase-admin");
-    const admin = adminMod.default || adminMod;
-    const cred = JSON.parse(sa);
-    const apps = admin.apps || [];
-    if (!apps.length) {
-      const bucketName =
-        process.env.FIREBASE_STORAGE_BUCKET ||
-        `${cred.project_id}.firebasestorage.app`;
-      admin.initializeApp({
-        credential: admin.credential.cert(cred),
-        storageBucket: bucketName
-      });
-      console.log("  Storage bucket:", bucketName);
-    }
-    firestore = admin.firestore();
-    useFirebase = true;
-    console.log("  Firebase connected — points will persist");
-    await loadAll();
-  } catch (err) {
-    console.error("  Firebase connect failed, using memory only:", err);
-    firestore = null;
-    useFirebase = false;
-  }
+function ensureDirs() {
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+async function connectDb() {
+  ensureDirs();
+  await loadAll();
+  console.log("  File store:", storeFile);
+}
 
 function stripUndefined(value: any): any {
   if (Array.isArray(value)) return value.map(stripUndefined);
@@ -152,56 +60,46 @@ function stripUndefined(value: any): any {
 }
 
 async function loadAll() {
-  if (!firestore) return;
-  const snap = await firestore.collection("store").doc("main").get();
-  if (snap.exists) {
-    const doc = snap.data() || {};
+  ensureDirs();
+  if (!fs.existsSync(storeFile)) {
+    storeLoaded = true;
+    console.log("  No store.json yet — starting empty");
+    return;
+  }
+  try {
+    const doc = JSON.parse(fs.readFileSync(storeFile, "utf8"));
     points = doc.points || [];
     replies = doc.replies || {};
     sponsorships = doc.sponsorships || {};
     manifesto = doc.manifesto || manifesto;
     discoveryStats = doc.discoveryStats || {};
     paypalConfig = doc.paypalConfig || paypalConfig;
-    console.log(`  Loaded ${points.length} points from Firebase`);
     lastSavedPointCount = points.length;
-  } else {
-    console.log("  Firebase store/main is empty — not overwriting until data exists");
+    console.log(`  Loaded ${points.length} points from file`);
+  } catch (err) {
+    console.error("  Could not read store.json:", err);
   }
   storeLoaded = true;
 }
 
 async function saveAll() {
-  if (!firestore) return;
+  ensureDirs();
   if (!storeLoaded) {
     console.log("  Skip save — store not loaded yet");
     return;
   }
-  if ((points || []).length === 0 && lastSavedPointCount > 0) {
-    console.log("  Skip save — refused to wipe", lastSavedPointCount, "existing points");
-    await loadAll();
-    return;
-  }
-  try {
-    const cleanPoints = (points || []).map((pt: any) => {
-      const oldMedia = Array.isArray(pt.media) ? pt.media : [];
-      const kept = oldMedia.filter((m: any) => m && typeof m.url === "string" && (m.url.startsWith("http") || m.url.startsWith("data:")));
-      return { ...pt, media: kept.filter((m: any) => m.url.startsWith("http") || m.url.startsWith("https")) };
-    });
-    const payload = stripUndefined({
-      points: cleanPoints,
-      replies,
-      sponsorships,
-      manifesto,
-      discoveryStats,
-      paypalConfig,
-      updatedAt: new Date().toISOString()
-    });
-    await firestore.collection("store").doc("main").set(payload);
-    lastSavedPointCount = cleanPoints.length;
-    console.log("  Firebase saved", cleanPoints.length, "points");
-  } catch (err) {
-    console.error("  Firebase save failed:", err);
-  }
+  const payload = stripUndefined({
+    points,
+    replies,
+    sponsorships,
+    manifesto,
+    discoveryStats,
+    paypalConfig,
+    updatedAt: new Date().toISOString()
+  });
+  fs.writeFileSync(storeFile, JSON.stringify(payload, null, 2));
+  lastSavedPointCount = (points || []).length;
+  console.log("  File saved", lastSavedPointCount, "points");
 }
 
 app.get("/api/points", (req, res) => {
@@ -417,7 +315,7 @@ app.get("/api/stats", (req, res) => {
   res.json({
     totalPoints: points.length,
     totalConnections: points.filter(p => p.linkedFromPointId).length,
-    persistence: useFirebase ? "firebase" : "memory"
+    persistence: "file"
   });
 });
 
@@ -449,51 +347,20 @@ app.post("/api/upload", async (req, res) => {
         ? "photo"
         : "file";
   if (!base64Data) return res.status(400).json({ error: "No file data" });
-
-  if (useFirebase) {
-    try {
-      const adminMod = await import("firebase-admin");
-      const admin = adminMod.default || adminMod;
-      const raw = String(base64Data).includes(",") ? String(base64Data).split(",")[1] : String(base64Data);
-      const buffer = Buffer.from(raw, "base64");
-      const safeName = String(filename || `file-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
-      const objectPath = `uploads/${Date.now()}-${safeName}`;
-      const bucket = admin.storage().bucket();
-      const file = bucket.file(objectPath);
-      await file.save(buffer, {
-        metadata: { contentType: fileType || "application/octet-stream" },
-        resumable: false
-      });
-      const [url] = await file.getSignedUrl({
-        action: "read",
-        expires: "2099-12-31"
-      });
-      console.log("  Stored media in Firebase Storage:", objectPath);
-      return res.json({ url, type, name: filename || safeName });
-    } catch (err) {
-      console.error("  Firebase Storage upload failed:", err);
-      try {
-        const adminMod2 = await import("firebase-admin");
-        const admin2 = adminMod2.default || adminMod2;
-        const cred = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || "{}");
-        const alt = admin2.storage().bucket(`${(cred.project_id || "make-your-point-11539")}.appspot.com`);
-        const raw2 = String(base64Data).includes(",") ? String(base64Data).split(",")[1] : String(base64Data);
-        const buffer2 = Buffer.from(raw2, "base64");
-        const safeName2 = String(filename || `file-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
-        const objectPath2 = `uploads/${Date.now()}-${safeName2}`;
-        const file2 = alt.file(objectPath2);
-        await file2.save(buffer2, { metadata: { contentType: fileType || "application/octet-stream" }, resumable: false });
-        const [url2] = await file2.getSignedUrl({ action: "read", expires: "2099-12-31" });
-        console.log("  Stored media in fallback bucket:", objectPath2);
-        return res.json({ url: url2, type, name: filename || safeName2 });
-      } catch (err2) {
-        console.error("  Fallback storage failed:", err2);
-        return res.status(500).json({ error: "Video/file storage failed. Check Firebase Storage is enabled." });
-      }
-    }
+  try {
+    ensureDirs();
+    const raw = String(base64Data).includes(",") ? String(base64Data).split(",")[1] : String(base64Data);
+    const buffer = Buffer.from(raw, "base64");
+    const safeName = String(filename || `file-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
+    const storedName = `${Date.now()}-${safeName}`;
+    fs.writeFileSync(path.join(uploadDir, storedName), buffer);
+    const url = `/uploads/${storedName}`;
+    console.log("  Stored media on disk:", url);
+    return res.json({ url, type, name: filename || safeName });
+  } catch (err) {
+    console.error("  Disk upload failed:", err);
+    return res.status(500).json({ error: "File could not be stored on the server." });
   }
-
-  res.json({ url: base64Data, type, name: filename });
 });
 
 app.get("/api/monetization/status", (req, res) => {
@@ -526,6 +393,7 @@ app.post("/api/seed-all", async (req, res) => {
 
 async function start() {
   await connectDb();
+  app.use("/uploads", express.static(uploadDir));
   if (!isProd) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -540,7 +408,7 @@ async function start() {
   }
   app.listen(Number(PORT), "0.0.0.0", () => {
     console.log(`\n  Make Your Point is running!`);
-    console.log(`  DB:    ${useFirebase ? "Firebase (persistent)" : "memory only"}\n`);
+    console.log(`  DB:    file store (${storeFile})\n`);
   });
 }
 
